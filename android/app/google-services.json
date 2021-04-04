@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "509557103792",
+    "project_id": "hand-sanitiser-c33d1",
+    "storage_bucket": "hand-sanitiser-c33d1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:509557103792:android:89ade8b82377380c0bef75",
+        "android_client_info": {
+          "package_name": "com.example.sanitiser_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "509557103792-u3ut8hhkn46674bj7a59lcpquslh0jdq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBLC8jt_TkiSEVc3krq4PI-Y0APpvsPKA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "509557103792-u3ut8hhkn46674bj7a59lcpquslh0jdq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
