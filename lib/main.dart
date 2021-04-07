@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sanitiser_app/admin_pages/login_screen.dart';
 import 'package:sanitiser_app/admin_pages/signup_screen.dart';
+import 'package:sanitiser_app/logged_in_pages/home_screen.dart';
 import './models/custom_route.dart';
 
 import 'admin_pages/welcome_screen.dart';
@@ -43,15 +44,16 @@ class MyApp extends StatelessWidget {
               if (userSnapshot.connectionState == ConnectionState.waiting)
                 return SplashScreen();
 
-              if (userSnapshot.hasData) {
-                return MessagingPage();
-              }
+              // if (userSnapshot.hasData) {
+              //   return HomeScreen();
+              // }
               return WelcomeScreen();
             },
           ),
           routes: {
             LoginScreen.routeName: (ctx) => LoginScreen(),
             SignupScreen.routeName: (ctx) => SignupScreen(),
+            HomeScreen.routeName: (ctx) => HomeScreen(),
           }),
     );
   }

@@ -1,6 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sanitiser_app/logged_in_pages/home_screen.dart';
 import 'package:sanitiser_app/widgets/ColoredWelcomeButton.dart';
 import 'package:sanitiser_app/widgets/CustomInputField.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class LoginScreen extends StatefulWidget {
   static const routeName = 'login';
@@ -10,27 +13,72 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  String _emailVal, _passwordVal;
+  String _email, _password;
+  bool showSpinner = false;
   final _formKey = GlobalKey<FormState>();
+  final _auth = FirebaseAuth.instance;
 
   bool _onSaved() {
     final isValid = _formKey.currentState.validate();
     if (!isValid) return false;
     _formKey.currentState.save();
+    print('Email Value: $_email, Password Value: $_password');
+    FocusScope.of(context).unfocus();
     return true;
+  }
+
+  void _loginUser() async {
+    setState(() {
+      showSpinner = true;
+    });
+    try {
+      final loggedInUser = await _auth.signInWithEmailAndPassword(
+          email: _email, password: _password);
+      if (loggedInUser == null) return;
+
+      print(loggedInUser.user);
+      print(loggedInUser.additionalUserInfo);
+      print(loggedInUser.credential);
+      Navigator.of(context).pushNamed(HomeScreen.routeName);
+    } on FirebaseAuthException catch (err) {
+      print('Error: ${err.runtimeType}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Incorrect email or password',
+            textAlign: TextAlign.center,
+          ),
+          backgroundColor: Theme.of(context).errorColor,
+        ),
+      );
+    } catch (err) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(err),
+          backgroundColor: Theme.of(context).errorColor,
+        ),
+      );
+    } finally {
+      setState(() {
+        showSpinner = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.white, Theme.of(context).accentColor])),
-      child: Scaffold(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.white, Theme.of(context).accentColor],
+        ),
+      ),
+      child: ModalProgressHUD(
+        inAsyncCall: showSpinner,
+        child: Scaffold(
           appBar: AppBar(
-            actions: [],
             leading: Builder(
               builder: (BuildContext context) {
                 return IconButton(
@@ -65,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(height: 80),
                       CustomInputField(
                         label: 'EMAIL',
-                        saveHandler: (val) => _emailVal = val,
+                        saveHandler: (val) => _email = val.trim(),
                         keyboardType: TextInputType.emailAddress,
                         validatorHandler: (val) {
                           if (!val.contains('@') || !val.contains('.com'))
@@ -76,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       CustomInputField(
                         label: 'PASSWORD',
                         obscureText: true,
-                        saveHandler: (val) => _passwordVal,
+                        saveHandler: (val) => _password = val.trim(),
                         validatorHandler: (val) {
                           if (val.length < 6)
                             return 'Password needs to be at least 6 characters long';
@@ -85,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       SizedBox(height: 50),
                       ColoredWelcomeButton(() {
-                        _onSaved();
+                        if (_onSaved()) _loginUser();
                       }, 'LOG IN'),
                       SizedBox(height: 10),
                       TextButton(
@@ -100,7 +148,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-          )),
+          ),
+        ),
+      ),
     );
   }
 }
