@@ -10,7 +10,7 @@ class ColoredWelcomeButton extends StatelessWidget {
     return SizedBox(
       width: 280,
       height: 45,
-      child: TextButton(
+      child: ElevatedButton(
         child: Text(label, style: TextStyle(fontSize: 18, color: Colors.black)),
         onPressed: pressHandler,
         style: ButtonStyle(

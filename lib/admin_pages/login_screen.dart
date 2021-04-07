@@ -10,6 +10,16 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  String _emailVal, _passwordVal;
+  final _formKey = GlobalKey<FormState>();
+
+  bool _onSaved() {
+    final isValid = _formKey.currentState.validate();
+    if (!isValid) return false;
+    _formKey.currentState.save();
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -37,29 +47,57 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           backgroundColor: Colors.transparent,
           body: SingleChildScrollView(
-            child: Center(
-              child: Column(
-                children: [
-                  SizedBox(
-                      height: 143 -
-                          AppBar().preferredSize.height -
-                          MediaQuery.of(context).padding.top),
-                  Text(
-                    'LOG IN',
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
+            child: Container(
+              child: Center(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                          height: 143 -
+                              AppBar().preferredSize.height -
+                              MediaQuery.of(context).padding.top),
+                      Text(
+                        'LOG IN',
+                        style: TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.w400),
+                      ),
+                      SizedBox(height: 80),
+                      CustomInputField(
+                        label: 'EMAIL',
+                        saveHandler: (val) => _emailVal = val,
+                        keyboardType: TextInputType.emailAddress,
+                        validatorHandler: (val) {
+                          if (!val.contains('@') || !val.contains('.com'))
+                            return 'Please enter a valid email address';
+                          return null;
+                        },
+                      ),
+                      CustomInputField(
+                        label: 'PASSWORD',
+                        obscureText: true,
+                        saveHandler: (val) => _passwordVal,
+                        validatorHandler: (val) {
+                          if (val.length < 6)
+                            return 'Password needs to be at least 6 characters long';
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 50),
+                      ColoredWelcomeButton(() {
+                        _onSaved();
+                      }, 'LOG IN'),
+                      SizedBox(height: 10),
+                      TextButton(
+                        onPressed: () {},
+                        child: Text(
+                          'FORGOT PASSWORD?',
+                          style: TextStyle(color: Colors.black, fontSize: 12),
+                        ),
+                      )
+                    ],
                   ),
-                  SizedBox(height: 80),
-                  CustomInputField(label: 'EMAIL'),
-                  SizedBox(height: 25),
-                  CustomInputField(label: 'PASSWORD'),
-                  SizedBox(height: 50),
-                  ColoredWelcomeButton(() {}, 'LOG IN'),
-                  SizedBox(height: 20),
-                  TextButton(
-                      onPressed: () {},
-                      child: Text('FORGOT PASSWORD?',
-                          style: TextStyle(color: Colors.black, fontSize: 10)))
-                ],
+                ),
               ),
             ),
           )),

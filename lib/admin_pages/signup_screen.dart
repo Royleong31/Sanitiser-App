@@ -10,6 +10,18 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  String _name, _email, _password;
+  final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  bool _onSaved() {
+    final isValid = _formKey.currentState.validate();
+    if (!isValid) return false;
+    _formKey.currentState.save();
+
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -38,27 +50,61 @@ class _SignupScreenState extends State<SignupScreen> {
           backgroundColor: Colors.transparent,
           body: SingleChildScrollView(
             child: Center(
-              child: Column(
-                children: [
-                  SizedBox(
-                      height: 143 -
-                          AppBar().preferredSize.height -
-                          MediaQuery.of(context).padding.top),
-                  Text(
-                    'SIGN UP',
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
-                  ),
-                  SizedBox(height: 80),
-                  CustomInputField(label: 'NAME'),
-                  SizedBox(height: 25),
-                  CustomInputField(label: 'EMAIL'),
-                  SizedBox(height: 25),
-                  CustomInputField(label: 'PASSWORD'),
-                  SizedBox(height: 25),
-                  CustomInputField(label: 'VERIFY PASSWORD'),
-                  SizedBox(height: 50),
-                  ColoredWelcomeButton(() {}, 'CREATE ACCOUNT')
-                ],
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    SizedBox(
+                        height: 143 -
+                            AppBar().preferredSize.height -
+                            MediaQuery.of(context).padding.top),
+                    Text(
+                      'SIGN UP',
+                      style:
+                          TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
+                    ),
+                    SizedBox(height: 80),
+                    CustomInputField(
+                      label: 'NAME',
+                      saveHandler: (val) => _name = val,
+                    ),
+                    CustomInputField(
+                      label: 'EMAIL',
+                      saveHandler: (val) => _email = val,
+                      keyboardType: TextInputType.emailAddress,
+                      validatorHandler: (val) {
+                        if (!val.contains('@') || !val.contains('.com'))
+                          return 'Please enter a valid email address';
+                        return null;
+                      },
+                    ),
+                    CustomInputField(
+                      label: 'PASSWORD',
+                      obscureText: true,
+                      saveHandler: (val) => _password = val,
+                      controller: _passwordController,
+                      validatorHandler: (val) {
+                        if (val.length < 6)
+                          return 'Password needs to be at least 6 characters long';
+                        return null;
+                      },
+                    ),
+                    CustomInputField(
+                      label: 'VERIFY PASSWORD',
+                      obscureText: true,
+                      validatorHandler: (val) {
+                        if (val.isEmpty || val != _passwordController.text) {
+                          return 'Passwords do not match';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 50),
+                    ColoredWelcomeButton(() {
+                      _onSaved();
+                    }, 'CREATE ACCOUNT')
+                  ],
+                ),
               ),
             ),
           )),
