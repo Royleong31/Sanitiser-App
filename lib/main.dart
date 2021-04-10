@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
             primarySwatch: Colors.grey,
             backgroundColor: Colors.white,
             accentColor: Color(0xFF49DAE3),
+            secondaryHeaderColor: Colors.black54,
             buttonColor: Color(0xFFE5E5E5),
             accentColorBrightness: Brightness.light,
             pageTransitionsTheme: PageTransitionsTheme(builders: {
@@ -44,9 +45,9 @@ class MyApp extends StatelessWidget {
               if (userSnapshot.connectionState == ConnectionState.waiting)
                 return SplashScreen();
 
-              // if (userSnapshot.hasData) {
-              //   return HomeScreen();
-              // }
+              if (userSnapshot.hasData) {
+                return HomeScreen();
+              }
               return WelcomeScreen();
             },
           ),

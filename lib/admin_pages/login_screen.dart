@@ -42,6 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.of(context).pushNamed(HomeScreen.routeName);
     } on FirebaseAuthException catch (err) {
       print('Error: ${err.runtimeType}');
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -106,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               AppBar().preferredSize.height -
                               MediaQuery.of(context).padding.top),
                       Text(
-                        'LOG IN',
+                        'LOGIN',
                         style: TextStyle(
                             fontSize: 30, fontWeight: FontWeight.w400),
                       ),
