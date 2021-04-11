@@ -56,34 +56,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 ? EdgeInsets.only(top: appBar.preferredSize.height)
                 : null,
             child: StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection('dispensers')
-                    .snapshots(),
-                builder: (ctx, dispenserSnapshot) {
-                  if (dispenserSnapshot.connectionState ==
-                      ConnectionState.waiting)
-                    return Center(child: CircularProgressIndicator());
+              stream: FirebaseFirestore.instance
+                  .collection('dispensers')
+                  .snapshots(),
+              builder: (ctx, dispenserSnapshot) {
+                if (dispenserSnapshot.connectionState ==
+                    ConnectionState.waiting)
+                  return Center(child: CircularProgressIndicator());
 
-                  final List<QueryDocumentSnapshot> dispenserData =
-                      dispenserSnapshot.data.docs;
-                  dispenserData.forEach((element) {
-                    print(element.data());
-                    print(element.id);
-                  });
+                final List<QueryDocumentSnapshot> dispenserData =
+                    dispenserSnapshot.data.docs;
+                dispenserData.forEach((element) {
+                  print(element.data());
+                  print(element.id);
+                });
 
-                  return ListView.builder(
-                      itemCount: dispenserData.length,
-                      itemBuilder: (ctx, i) {
-                        final Map<String, dynamic> currentDoc =
-                            dispenserData[i].data();
+                return ListView.builder(
+                  itemCount: dispenserData.length,
+                  itemBuilder: (ctx, i) {
+                    final Map<String, dynamic> currentDoc =
+                        dispenserData[i].data();
 
-                        return DispenserContainer(
-                          level: currentDoc['level'].toInt(),
-                          dispenserId: currentDoc['dispenserId'],
-                          location: currentDoc['location'],
-                        );
-                      });
-                }),
+                    return DispenserContainer(
+                      level: currentDoc['level'].toInt(),
+                      dispenserId: currentDoc['dispenserId'],
+                      location: currentDoc['location'],
+                    );
+                  },
+                );
+              },
+            ),
           ),
           OverlayMenu(() {
             setState(() {

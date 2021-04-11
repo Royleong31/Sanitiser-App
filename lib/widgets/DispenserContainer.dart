@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sanitiser_app/models/const.dart';
+import 'package:sanitiser_app/models/dialogs.dart';
 import 'GeneralButton.dart';
 
 // ignore: must_be_immutable
@@ -114,7 +115,7 @@ class DispenserContainer extends StatelessWidget {
                   openResetDialog(context);
                 }),
                 GeneralButton('MORE INFO', Color(0xFF89F2AD), () {
-                  openInfoDialog(context);
+                  openInfoDialog(context, dispenserId, location);
                 })
               ],
             )

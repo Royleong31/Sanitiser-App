@@ -7,7 +7,6 @@ import 'package:sanitiser_app/logged_in_pages/home_screen.dart';
 import './models/custom_route.dart';
 
 import 'admin_pages/welcome_screen.dart';
-import 'messaging_page.dart';
 import 'splash_screen.dart';
 
 void main() async {
