@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'GeneralOutlinedButton.dart';
@@ -97,6 +98,7 @@ class OverlayMenu extends StatelessWidget {
                                     alignment: Alignment.center,
                                     child: GeneralOutlinedButton('LOG OUT', () {
                                       print('logging out');
+                                      FirebaseAuth.instance.signOut();
                                     }),
                                   ),
                                 ],
