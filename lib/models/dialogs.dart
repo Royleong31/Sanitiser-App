@@ -1,10 +1,12 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:sanitiser_app/models/const.dart';
 import 'package:sanitiser_app/widgets/GeneralButton.dart';
 import 'package:sanitiser_app/widgets/InfoDialog.dart';
+import 'package:http/http.dart' as http;
 
-void openResetDialog(BuildContext context) {
+void openResetDialog(BuildContext context, String userId, String dispenserId) {
   showGeneralDialog(
     barrierColor: Colors.transparent,
     transitionBuilder: (context, a1, a2, widget) {
@@ -42,8 +44,42 @@ void openResetDialog(BuildContext context) {
                       children: [
                         GeneralButton('CLOSE', Color(0xFFE5E5E5),
                             () => Navigator.of(context).pop()),
-                        GeneralButton('RESET', Theme.of(context).accentColor,
-                            () => Navigator.of(context).pop()),
+                        GeneralButton(
+                          'RESET',
+                          Theme.of(context).accentColor,
+                          () async {
+                            final url = Uri.https(
+                              'us-central1-hand-sanitiser-c33d1.cloudfunctions.net',
+                              '/usage/$userId/$dispenserId/reset',
+                            );
+
+                            http.Response response;
+
+                            try {
+                              response = await http.patch(url);
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content: Text(
+                                    'Successfully reset counter!',
+                                    textAlign: TextAlign.center),
+                                backgroundColor: Colors.lightGreen,
+                              ));
+                            } catch (e) {
+                              print(e);
+                               ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content: Text(
+                                    'There was an error in resetting counter',
+                                    textAlign: TextAlign.center),
+                                backgroundColor: kLowColor,
+                              ));
+                            } finally {
+                              print(response.body);
+                              Navigator.of(context).pop();
+                            }
+                          },
+                          isAsync: true,
+                        ),
                       ],
                     )
                   ],
@@ -70,7 +106,10 @@ void openInfoDialog(BuildContext context, String dispenserId, String location) {
     transitionBuilder: (context, a1, a2, widget) {
       final curvedValue = Curves.easeIn.transform(a1.value) - 1.0;
       return InfoDialog(
-          curvedValue: curvedValue, a1: a1, dispenserId: dispenserId, location: location);
+          curvedValue: curvedValue,
+          a1: a1,
+          dispenserId: dispenserId,
+          location: location);
     },
     transitionDuration: Duration(milliseconds: 350),
     barrierDismissible: true,

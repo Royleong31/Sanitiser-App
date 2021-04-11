@@ -82,10 +82,12 @@ class DispenserContainer extends StatelessWidget {
                     margin: EdgeInsets.symmetric(vertical: 5),
                     decoration: BoxDecoration(
                       color: barColor,
-                      borderRadius: level == 100 ? BorderRadius.circular(5) : BorderRadius.only(
-                        topLeft: Radius.circular(5),
-                        bottomLeft: Radius.circular(5),
-                      ),
+                      borderRadius: level == 100
+                          ? BorderRadius.circular(5)
+                          : BorderRadius.only(
+                              topLeft: Radius.circular(5),
+                              bottomLeft: Radius.circular(5),
+                            ),
                     ),
                     height: 40,
                   ),
@@ -112,7 +114,7 @@ class DispenserContainer extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 GeneralButton('RESET COUNT', kLightGreyColor, () {
-                  openResetDialog(context);
+                  openResetDialog(context, '12345678', dispenserId);
                 }),
                 GeneralButton('MORE INFO', Color(0xFF89F2AD), () {
                   openInfoDialog(context, dispenserId, location);

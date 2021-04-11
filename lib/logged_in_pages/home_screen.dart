@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sanitiser_app/splash_screen.dart';
 import 'package:sanitiser_app/widgets/DispenserContainer.dart';
 import 'package:sanitiser_app/widgets/OverlayMenu.dart';
 
@@ -13,6 +14,32 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  @override
+  Widget build(BuildContext context) {
+    print('Firebase auth instance: ${FirebaseAuth.instance.currentUser.uid}');
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance.collection('dispensers').snapshots(),
+      builder: (ctx, dispenserSnapshot) {
+        if (dispenserSnapshot.connectionState == ConnectionState.waiting)
+          return SplashScreen();
+
+        final List<QueryDocumentSnapshot> dispenserData =
+            dispenserSnapshot.data.docs;
+        return HomeWidget(dispenserData);
+      },
+    );
+  }
+}
+
+class HomeWidget extends StatefulWidget {
+  HomeWidget(this.dispenserData);
+  final List<QueryDocumentSnapshot> dispenserData;
+
+  @override
+  _HomeWidgetState createState() => _HomeWidgetState();
+}
+
+class _HomeWidgetState extends State<HomeWidget> {
   bool menuOpened = false;
 
   get appBar {
@@ -45,7 +72,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('Firebase auth instance: ${FirebaseAuth.instance.currentUser.uid}');
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: menuOpened ? null : appBar,
@@ -55,34 +81,16 @@ class _HomeScreenState extends State<HomeScreen> {
             margin: menuOpened
                 ? EdgeInsets.only(top: appBar.preferredSize.height)
                 : null,
-            child: StreamBuilder(
-              stream: FirebaseFirestore.instance
-                  .collection('dispensers')
-                  .snapshots(),
-              builder: (ctx, dispenserSnapshot) {
-                if (dispenserSnapshot.connectionState ==
-                    ConnectionState.waiting)
-                  return Center(child: CircularProgressIndicator());
+            child: ListView.builder(
+              itemCount: widget.dispenserData.length,
+              itemBuilder: (ctx, i) {
+                final Map<String, dynamic> currentDoc =
+                    widget.dispenserData[i].data();
 
-                final List<QueryDocumentSnapshot> dispenserData =
-                    dispenserSnapshot.data.docs;
-                dispenserData.forEach((element) {
-                  print(element.data());
-                  print(element.id);
-                });
-
-                return ListView.builder(
-                  itemCount: dispenserData.length,
-                  itemBuilder: (ctx, i) {
-                    final Map<String, dynamic> currentDoc =
-                        dispenserData[i].data();
-
-                    return DispenserContainer(
-                      level: currentDoc['level'].toInt(),
-                      dispenserId: currentDoc['dispenserId'],
-                      location: currentDoc['location'],
-                    );
-                  },
+                return DispenserContainer(
+                  level: currentDoc['level'].toInt(),
+                  dispenserId: currentDoc['dispenserId'],
+                  location: currentDoc['location'],
                 );
               },
             ),
