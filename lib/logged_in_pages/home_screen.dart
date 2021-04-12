@@ -3,20 +3,43 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:sanitiser_app/models/userData.dart';
 import 'package:sanitiser_app/splash_screen.dart';
 import 'package:sanitiser_app/widgets/DispenserContainer.dart';
 import 'package:sanitiser_app/widgets/OverlayMenu.dart';
+import 'package:provider/provider.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   static const routeName = 'home';
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
 
-class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    print('Firebase auth instance: ${FirebaseAuth.instance.currentUser.uid}');
+    String userId = FirebaseAuth.instance.currentUser.uid;
+    print('Firebase auth instance: $userId');
+
+    FirebaseFirestore.instance
+        .collection('users')
+        .where('userId', isEqualTo: '12345678')
+        .get()
+        .then((QuerySnapshot snp) {
+      Map<String, dynamic> userInfo = snp.docs[0].data();
+
+      Provider.of<UserData>(context, listen: false).setValues(
+        userInfo['name'],
+        userInfo['userId'],
+        userInfo['email'],
+        List<String>.from(snp.docs[0].data()['deviceTokens']),
+        List<String>.from(snp.docs[0].data()['dispensers']),
+      );
+      print('--------------------');
+      final providerObject = Provider.of<UserData>(context, listen: false);
+      print('Device Tokens: ${providerObject.deviceTokens}');
+      print('Name: ${providerObject.name}');
+      print('Email: ${providerObject.email}');
+      print('Dispensers: ${providerObject.dispensers}');
+      print('User Id: ${providerObject.userId}');
+    });
+
     return StreamBuilder(
       stream: FirebaseFirestore.instance.collection('dispensers').snapshots(),
       builder: (ctx, dispenserSnapshot) {

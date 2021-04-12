@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:sanitiser_app/admin_pages/login_screen.dart';
 import 'package:sanitiser_app/admin_pages/signup_screen.dart';
 import 'package:sanitiser_app/logged_in_pages/home_screen.dart';
@@ -8,11 +10,15 @@ import './models/custom_route.dart';
 
 import 'admin_pages/welcome_screen.dart';
 import 'splash_screen.dart';
+import './models/userData.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((value) => runApp(MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -45,8 +51,12 @@ class MyApp extends StatelessWidget {
                 return SplashScreen();
 
               if (userSnapshot.hasData) {
-                return HomeScreen();
+                return ChangeNotifierProvider(
+                  create: (ctx) => UserData(),
+                  builder: (ctx, _) => HomeScreen(),
+                );
               }
+
               return WelcomeScreen();
             },
           ),

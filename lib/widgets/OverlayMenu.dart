@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:sanitiser_app/models/userData.dart';
 
 import 'GeneralOutlinedButton.dart';
 import 'MenuButton.dart';
@@ -63,13 +65,18 @@ class OverlayMenu extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('WELCOME \nALAN CHOO',
+                                  Consumer<UserData>(
+                                    builder: (BuildContext ctx, userData, _) =>
+                                        Text(
+                                      'WELCOME \n${userData.name}',
                                       style: TextStyle(
                                         fontSize: 30,
                                         fontWeight: FontWeight.w400,
                                         color: Theme.of(context)
                                             .secondaryHeaderColor,
-                                      )),
+                                      ),
+                                    ),
+                                  ),
                                   SizedBox(height: 70),
                                   MenuButton(
                                       title: 'EDIT PROFILE',
