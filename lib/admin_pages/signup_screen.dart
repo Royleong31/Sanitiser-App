@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:sanitiser_app/logged_in_pages/home_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:sanitiser_app/provider/authProvider.dart';
 import 'package:sanitiser_app/widgets/ColoredWelcomeButton.dart';
 import 'package:sanitiser_app/widgets/CustomInputField.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -36,25 +37,24 @@ class _SignupScreenState extends State<SignupScreen> {
     });
 
     try {
-      final newUser = await _auth.createUserWithEmailAndPassword(
-        email: _email,
-        password: _password,
-      );
+      // final newUser = await _auth.createUserWithEmailAndPassword(
+      //   email: _email,
+      //   password: _password,
+      // );
 
-      if (newUser != null) {
-        Navigator.of(context).pushNamed(HomeScreen.routeName);
-        print(newUser.user);
-        print(newUser.additionalUserInfo);
-        print(newUser.credential);
-      }
+      // if (newUser != null) {
+      //   Navigator.of(context).pushNamed(HomeScreen.routeName);
+      //   print(newUser.user);
+      //   print(newUser.additionalUserInfo);
+      //   print(newUser.credential);
+      // }
 
-      var userInfo = await firestore.collection('users').add({
-        '_name': _name,
-        'email': _email,
-      });
-      
+      // var userInfo = await firestore.collection('users').add({
+      //   '_name': _name,
+      //   'email': _email,
+      // });
 
-      print('User Info: $userInfo');
+      // print('User Info: $userInfo');
     } catch (err) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -153,7 +153,14 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       SizedBox(height: 50),
                       ColoredWelcomeButton(() {
-                        if (_onSaved()) _registerUser();
+                        // if (_onSaved()) _registerUser();
+                        if (_onSaved()) {
+                          setState(() {
+                            showSpinner = true;
+                          });
+                          Provider.of<AuthProvider>(context, listen: false)
+                              .signUp(_email, _password, context);
+                        }
                       }, 'CREATE ACCOUNT')
                     ],
                   ),

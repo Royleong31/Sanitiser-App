@@ -6,11 +6,12 @@ import 'package:provider/provider.dart';
 import 'package:sanitiser_app/admin_pages/login_screen.dart';
 import 'package:sanitiser_app/admin_pages/signup_screen.dart';
 import 'package:sanitiser_app/logged_in_pages/home_screen.dart';
+import 'package:sanitiser_app/provider/authProvider.dart';
 import './models/custom_route.dart';
 
 import 'admin_pages/welcome_screen.dart';
 import 'splash_screen.dart';
-import './models/userData.dart';
+import 'provider/userProvider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,47 +25,62 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
-        FocusScope.of(context).requestFocus(FocusNode());
-      },
-      child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Sanitiser Info',
-          theme: ThemeData(
-            primarySwatch: Colors.grey,
-            backgroundColor: Colors.white,
-            accentColor: Color(0xFF49DAE3),
-            secondaryHeaderColor: Colors.black54,
-            buttonColor: Color(0xFFE5E5E5),
-            accentColorBrightness: Brightness.light,
-            pageTransitionsTheme: PageTransitionsTheme(builders: {
-              TargetPlatform.android: CustomPageTransitionsBuilder(),
-              TargetPlatform.iOS: CustomPageTransitionsBuilder(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider<AuthProvider>(
+          create: (_) => AuthProvider(FirebaseAuth.instance),
+        ),
+        StreamProvider(
+          initialData: null,
+          create: (context) => context.read<AuthProvider>().authState,
+        )
+      ],
+      builder: (ctx, _) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          FocusScope.of(context).requestFocus(FocusNode());
+        },
+        child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Sanitiser Info',
+            theme: ThemeData(
+              primarySwatch: Colors.grey,
+              backgroundColor: Colors.white,
+              accentColor: Color(0xFF49DAE3),
+              secondaryHeaderColor: Colors.black54,
+              buttonColor: Color(0xFFE5E5E5),
+              accentColorBrightness: Brightness.light,
+              pageTransitionsTheme: PageTransitionsTheme(builders: {
+                TargetPlatform.android: CustomPageTransitionsBuilder(),
+                TargetPlatform.iOS: CustomPageTransitionsBuilder(),
+              }),
+            ),
+            home: Authenticate(),
+            routes: {
+              WelcomeScreen.routeName: (ctx) => WelcomeScreen(),
+              SplashScreen.routeName: (ctx) => SplashScreen(),
+              LoginScreen.routeName: (ctx) => LoginScreen(),
+              SignupScreen.routeName: (ctx) => SignupScreen(),
+              HomeScreen.routeName: (ctx) => HomeScreen(),
             }),
-          ),
-          home: StreamBuilder(
-            stream: FirebaseAuth.instance.authStateChanges(),
-            builder: (ctx, userSnapshot) {
-              if (userSnapshot.connectionState == ConnectionState.waiting)
-                return SplashScreen();
-
-              if (userSnapshot.hasData) {
-                return ChangeNotifierProvider(
-                  create: (ctx) => UserData(),
-                  builder: (ctx, _) => HomeScreen(),
-                );
-              }
-
-              return WelcomeScreen();
-            },
-          ),
-          routes: {
-            LoginScreen.routeName: (ctx) => LoginScreen(),
-            SignupScreen.routeName: (ctx) => SignupScreen(),
-            HomeScreen.routeName: (ctx) => HomeScreen(),
-          }),
+      ),
     );
+  }
+}
+
+class Authenticate extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final firebaseUser = context.watch<User>();
+    print("Firebase User: $firebaseUser");
+
+    if (firebaseUser != null) {
+      print('home is homescreen');
+
+      return HomeScreen();
+    }
+
+    return WelcomeScreen();
   }
 }

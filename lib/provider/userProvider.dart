@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 
-class UserData with ChangeNotifier {
+class UserProvider with ChangeNotifier {
   String name, userId, email;
   List<String> dispensers, deviceTokens;
 
-  UserData(
+  UserProvider(
       {this.name, this.userId, this.email, this.deviceTokens, this.dispensers});
 
   void setValues(String _name, String _userId, String _email,

@@ -1,6 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:sanitiser_app/admin_pages/welcome_screen.dart';
 import 'package:sanitiser_app/logged_in_pages/home_screen.dart';
+import 'package:sanitiser_app/main.dart';
+import 'package:sanitiser_app/provider/authProvider.dart';
+import 'package:sanitiser_app/splash_screen.dart';
 import 'package:sanitiser_app/widgets/ColoredWelcomeButton.dart';
 import 'package:sanitiser_app/widgets/CustomInputField.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -32,14 +37,15 @@ class _LoginScreenState extends State<LoginScreen> {
       showSpinner = true;
     });
     try {
-      final loggedInUser = await _auth.signInWithEmailAndPassword(
-          email: _email, password: _password);
-      if (loggedInUser == null) return;
+      // final loggedInUser = await _auth.signInWithEmailAndPassword(
+      //     email: _email, password: _password);
+      // if (loggedInUser == null) return;
 
-      print(loggedInUser.user);
-      print(loggedInUser.additionalUserInfo);
-      print(loggedInUser.credential);
-      Navigator.of(context).pushNamed(HomeScreen.routeName);
+      // print('logging in');
+      // print(loggedInUser.user);
+      // print(loggedInUser.additionalUserInfo);
+      // print(loggedInUser.credential);
+      // Navigator.of(context).pushNamed(HomeScreen.routeName);
     } on FirebaseAuthException catch (err) {
       print('Error: ${err.runtimeType}');
 
@@ -134,7 +140,22 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       SizedBox(height: 50),
                       ColoredWelcomeButton(() {
-                        if (_onSaved()) _loginUser();
+                        // Provider.of<AuthProvider>(context).signIn();
+                        if (_onSaved()) {
+                          context
+                              .read<AuthProvider>()
+                              .signIn(_email, _password, context)
+                              .catchError((err) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(err),
+                              backgroundColor: Theme.of(context).errorColor,
+                            ));
+                          });
+
+                          setState(() {
+                            showSpinner = true;
+                          });
+                        }
                       }, 'LOG IN'),
                       SizedBox(height: 10),
                       TextButton(

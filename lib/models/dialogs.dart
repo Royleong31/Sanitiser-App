@@ -59,14 +59,13 @@ void openResetDialog(BuildContext context, String userId, String dispenserId) {
                               response = await http.patch(url);
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(SnackBar(
-                                content: Text(
-                                    'Successfully reset counter!',
+                                content: Text('Successfully reset counter!',
                                     textAlign: TextAlign.center),
                                 backgroundColor: Colors.lightGreen,
                               ));
                             } catch (e) {
                               print(e);
-                               ScaffoldMessenger.of(context)
+                              ScaffoldMessenger.of(context)
                                   .showSnackBar(SnackBar(
                                 content: Text(
                                     'There was an error in resetting counter',
@@ -102,7 +101,7 @@ void openResetDialog(BuildContext context, String userId, String dispenserId) {
 
 void openInfoDialog(BuildContext context, String dispenserId, String location) {
   showGeneralDialog(
-    barrierColor: Colors.transparent,
+    barrierColor: null,
     transitionBuilder: (context, a1, a2, widget) {
       final curvedValue = Curves.easeIn.transform(a1.value) - 1.0;
       return InfoDialog(

@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:sanitiser_app/models/userData.dart';
+import 'package:sanitiser_app/provider/userProvider.dart';
 import 'package:sanitiser_app/splash_screen.dart';
 import 'package:sanitiser_app/widgets/DispenserContainer.dart';
 import 'package:sanitiser_app/widgets/OverlayMenu.dart';
@@ -24,7 +24,7 @@ class HomeScreen extends StatelessWidget {
         .then((QuerySnapshot snp) {
       Map<String, dynamic> userInfo = snp.docs[0].data();
 
-      Provider.of<UserData>(context, listen: false).setValues(
+      Provider.of<UserProvider>(context, listen: false).setValues(
         userInfo['name'],
         userInfo['userId'],
         userInfo['email'],
@@ -32,7 +32,7 @@ class HomeScreen extends StatelessWidget {
         List<String>.from(snp.docs[0].data()['dispensers']),
       );
       print('--------------------');
-      final providerObject = Provider.of<UserData>(context, listen: false);
+      final providerObject = Provider.of<UserProvider>(context, listen: false);
       print('Device Tokens: ${providerObject.deviceTokens}');
       print('Name: ${providerObject.name}');
       print('Email: ${providerObject.email}');

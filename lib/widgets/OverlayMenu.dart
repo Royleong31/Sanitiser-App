@@ -3,7 +3,9 @@ import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sanitiser_app/models/userData.dart';
+import 'package:sanitiser_app/admin_pages/welcome_screen.dart';
+import 'package:sanitiser_app/provider/authProvider.dart';
+import 'package:sanitiser_app/provider/userProvider.dart';
 
 import 'GeneralOutlinedButton.dart';
 import 'MenuButton.dart';
@@ -65,7 +67,7 @@ class OverlayMenu extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Consumer<UserData>(
+                                  Consumer<UserProvider>(
                                     builder: (BuildContext ctx, userData, _) =>
                                         Text(
                                       'WELCOME \n${userData.name}',
@@ -105,7 +107,10 @@ class OverlayMenu extends StatelessWidget {
                                     alignment: Alignment.center,
                                     child: GeneralOutlinedButton('LOG OUT', () {
                                       print('logging out');
-                                      FirebaseAuth.instance.signOut();
+                                      context.read<AuthProvider>().signOut();
+                                      // FirebaseAuth.instance.signOut();
+                                      // Navigator.of(context).popAndPushNamed(
+                                      //     WelcomeScreen.routeName);
                                     }),
                                   ),
                                 ],
