@@ -5,11 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitiser_app/admin_pages/login_screen.dart';
 import 'package:sanitiser_app/admin_pages/signup_screen.dart';
-import 'package:sanitiser_app/logged_in_pages/home_screen.dart';
+import 'package:sanitiser_app/logged_in_pages/editProfile.dart';
+import 'package:sanitiser_app/logged_in_pages/homeScreen.dart';
+import 'package:sanitiser_app/logged_in_pages/resetPassword.dart';
 import 'package:sanitiser_app/provider/authProvider.dart';
 import './models/custom_route.dart';
 
 import 'admin_pages/welcome_screen.dart';
+import 'logged_in_pages/editDevices.dart';
+import 'logged_in_pages/notifications.dart';
 import 'splash_screen.dart';
 import 'provider/userProvider.dart';
 
@@ -58,11 +62,17 @@ class MyApp extends StatelessWidget {
             ),
             home: Authenticate(),
             routes: {
+              // ADMIN PAGES
               WelcomeScreen.routeName: (ctx) => WelcomeScreen(),
               SplashScreen.routeName: (ctx) => SplashScreen(),
               LoginScreen.routeName: (ctx) => LoginScreen(),
               SignupScreen.routeName: (ctx) => SignupScreen(),
+              // LOGGED IN PAGES
               HomeScreen.routeName: (ctx) => HomeScreen(),
+              EditProfile.routeName: (ctx) => EditProfile(),
+              Notifications.routeName: (ctx) => Notifications(),
+              ResetPassword.routeName: (ctx) => ResetPassword(),
+              EditDevices.routeName: (ctx) => EditDevices(),
             }),
       ),
     );

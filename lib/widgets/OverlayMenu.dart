@@ -4,6 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitiser_app/admin_pages/welcome_screen.dart';
+import 'package:sanitiser_app/logged_in_pages/editDevices.dart';
+import 'package:sanitiser_app/logged_in_pages/editProfile.dart';
+import 'package:sanitiser_app/logged_in_pages/homeScreen.dart';
+import 'package:sanitiser_app/logged_in_pages/notifications.dart';
+import 'package:sanitiser_app/logged_in_pages/resetPassword.dart';
 import 'package:sanitiser_app/provider/authProvider.dart';
 import 'package:sanitiser_app/provider/userProvider.dart';
 
@@ -79,27 +84,38 @@ class OverlayMenu extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                                  SizedBox(height: 70),
+                                  SizedBox(height: 50),
+                                  MenuButton(
+                                      title: 'OVERVIEW',
+                                      onPressed: () {
+                                        Navigator.pushReplacementNamed(
+                                            context, HomeScreen.routeName);
+                                      }),
                                   MenuButton(
                                       title: 'EDIT PROFILE',
                                       onPressed: () {
-                                        print('editing profile');
+                                        Navigator.pushReplacementNamed(
+                                            context, EditProfile.routeName);
                                       }),
                                   MenuButton(
                                     title: 'NOTIFICATIONS',
                                     onPressed: () {
-                                      print('notifications');
+                                      Navigator.pushReplacementNamed(
+                                          context, Notifications.routeName);
                                     },
                                   ),
                                   MenuButton(
-                                      title: 'RESET PASSWORD',
-                                      onPressed: () {
-                                        print('resetting password');
-                                      }),
-                                  MenuButton(
-                                    title: 'ADD NEW DEVICE',
+                                    title: 'RESET PASSWORD',
                                     onPressed: () {
-                                      print('adding new device');
+                                      Navigator.pushReplacementNamed(
+                                          context, ResetPassword.routeName);
+                                    },
+                                  ),
+                                  MenuButton(
+                                    title: 'EDIT DEVICES',
+                                    onPressed: () {
+                                      Navigator.pushReplacementNamed(
+                                          context, EditDevices.routeName);
                                     },
                                   ),
                                   SizedBox(height: 50),
@@ -107,8 +123,9 @@ class OverlayMenu extends StatelessWidget {
                                     alignment: Alignment.center,
                                     child: GeneralOutlinedButton('LOG OUT', () {
                                       print('logging out');
-                                      Provider.of<AuthProvider>(context, listen: false).signOut(context);
-                            
+                                      Provider.of<AuthProvider>(context,
+                                              listen: false)
+                                          .signOut(context);
                                     }),
                                   ),
                                 ],

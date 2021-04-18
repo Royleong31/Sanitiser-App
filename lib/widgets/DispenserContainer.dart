@@ -116,7 +116,7 @@ class DispenserContainer extends StatelessWidget {
                 GeneralButton('RESET COUNT', kLightGreyColor, () {
                   openResetDialog(context, '12345678', dispenserId);
                 }),
-                GeneralButton('MORE INFO', Color(0xFF89F2AD), () {
+                GeneralButton('MORE INFO', klightGreenColor, () {
                   openInfoDialog(context, dispenserId, location);
                 })
               ],
