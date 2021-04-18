@@ -107,10 +107,8 @@ class OverlayMenu extends StatelessWidget {
                                     alignment: Alignment.center,
                                     child: GeneralOutlinedButton('LOG OUT', () {
                                       print('logging out');
-                                      context.read<AuthProvider>().signOut();
-                                      // FirebaseAuth.instance.signOut();
-                                      // Navigator.of(context).popAndPushNamed(
-                                      //     WelcomeScreen.routeName);
+                                      Provider.of<AuthProvider>(context, listen: false).signOut(context);
+                            
                                     }),
                                   ),
                                 ],

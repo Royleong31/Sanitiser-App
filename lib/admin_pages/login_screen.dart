@@ -36,40 +36,18 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       showSpinner = true;
     });
-    try {
-      // final loggedInUser = await _auth.signInWithEmailAndPassword(
-      //     email: _email, password: _password);
-      // if (loggedInUser == null) return;
+    await Provider.of<AuthProvider>(context, listen: false)
+        .signIn(_email, _password, context)
+        .catchError((err) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(err),
+        backgroundColor: Theme.of(context).errorColor,
+      ));
+    });
 
-      // print('logging in');
-      // print(loggedInUser.user);
-      // print(loggedInUser.additionalUserInfo);
-      // print(loggedInUser.credential);
-      // Navigator.of(context).pushNamed(HomeScreen.routeName);
-    } on FirebaseAuthException catch (err) {
-      print('Error: ${err.runtimeType}');
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Incorrect email or password',
-            textAlign: TextAlign.center,
-          ),
-          backgroundColor: Theme.of(context).errorColor,
-        ),
-      );
-    } catch (err) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(err),
-          backgroundColor: Theme.of(context).errorColor,
-        ),
-      );
-    } finally {
-      setState(() {
-        showSpinner = false;
-      });
-    }
+    setState(() {
+      showSpinner = false;
+    });
   }
 
   @override
@@ -140,22 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       SizedBox(height: 50),
                       ColoredWelcomeButton(() {
-                        // Provider.of<AuthProvider>(context).signIn();
-                        if (_onSaved()) {
-                          context
-                              .read<AuthProvider>()
-                              .signIn(_email, _password, context)
-                              .catchError((err) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(err),
-                              backgroundColor: Theme.of(context).errorColor,
-                            ));
-                          });
-
-                          setState(() {
-                            showSpinner = true;
-                          });
-                        }
+                        if (_onSaved()) _loginUser();
                       }, 'LOG IN'),
                       SizedBox(height: 10),
                       TextButton(

@@ -6,7 +6,7 @@ import 'signup_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   static const routeName = 'welcome';
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -19,34 +19,36 @@ class WelcomeScreen extends StatelessWidget {
         // By defaut, Scaffold background is white
         // Set its value to transparent
         backgroundColor: Colors.transparent,
-        body: Center(
-          child: Column(
-            children: [
-              SizedBox(height: 143),
-              Text(
-                'WELCOME',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
-              ),
-              SizedBox(height: 330),
-              ColoredWelcomeButton(() {
-                Navigator.pushNamed(context, LoginScreen.routeName);
-              }, 'LOG IN'),
-              SizedBox(height: 20),
-              SizedBox(
-                width: 280,
-                height: 45,
-                child: OutlinedButton(
-                  child: Text('SIGN UP',
-                      style: TextStyle(fontSize: 18, color: Colors.black)),
-                  onPressed: () {
-                    Navigator.pushNamed(context, SignupScreen.routeName);
-                  },
-                  style: ButtonStyle(
-                      side: MaterialStateProperty.all<BorderSide>(
-                          BorderSide(color: Colors.black))),
+        body: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              children: [
+                SizedBox(height: 143),
+                Text(
+                  'WELCOME',
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
                 ),
-              ),
-            ],
+                SizedBox(height: 330),
+                ColoredWelcomeButton(() {
+                  Navigator.pushNamed(context, LoginScreen.routeName);
+                }, 'LOG IN'),
+                SizedBox(height: 20),
+                SizedBox(
+                  width: 280,
+                  height: 45,
+                  child: OutlinedButton(
+                    child: Text('SIGN UP',
+                        style: TextStyle(fontSize: 18, color: Colors.black)),
+                    onPressed: () {
+                      Navigator.pushNamed(context, SignupScreen.routeName);
+                    },
+                    style: ButtonStyle(
+                        side: MaterialStateProperty.all<BorderSide>(
+                            BorderSide(color: Colors.black))),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

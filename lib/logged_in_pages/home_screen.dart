@@ -1,43 +1,104 @@
-import 'dart:ui';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:sanitiser_app/provider/userProvider.dart';
 import 'package:sanitiser_app/splash_screen.dart';
-import 'package:sanitiser_app/widgets/DispenserContainer.dart';
-import 'package:sanitiser_app/widgets/OverlayMenu.dart';
+import 'package:sanitiser_app/widgets/HomeWidget.dart';
 import 'package:provider/provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   static const routeName = 'home';
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String thisDeviceToken;
+
+  @override
+  void initState() {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      print('Got a message whilst in the foreground!');
+      print('Message data: ${message.data}');
+
+      if (message.notification != null) {
+        print(
+            'Message also contained a notification: ${message.notification.body}');
+      }
+    });
+
+    messaging.getToken().then((deviceToken) {
+      thisDeviceToken = deviceToken;
+      print('Device Token: $deviceToken');
+    });
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Got a message whilst in the foreground!');
+      print('Message data: ${message.data}');
+      showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+                title: Text("${message.notification.title}!"),
+                content: message.notification.body.isEmpty
+                    ? null
+                    : Text("${message.notification.body}"),
+                actions: <Widget>[
+                  TextButton(
+                    child: Text('Close'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              ));
+
+      if (message.notification != null) {
+        print(
+            'Message also contained a notification: title: ${message.notification.title} body: ${message.notification.body}');
+      }
+    });
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     String userId = FirebaseAuth.instance.currentUser.uid;
-    print('Firebase auth instance: $userId');
+    String userDocId;
+    final usersCollection = FirebaseFirestore.instance.collection('users');
 
-    FirebaseFirestore.instance
-        .collection('users')
-        .where('userId', isEqualTo: '12345678')
+    usersCollection
+        .where('userId', isEqualTo: userId)
         .get()
         .then((QuerySnapshot snp) {
       Map<String, dynamic> userInfo = snp.docs[0].data();
+      userDocId = snp.docs[0].id;
+      final deviceTokens =
+          List<String>.from(snp.docs[0].data()['deviceTokens']);
+      final dispensers = List<String>.from(snp.docs[0].data()['dispensers']);
+
+      if (!deviceTokens.contains(thisDeviceToken)) {
+        deviceTokens.add(thisDeviceToken);
+        print('adding new device token');
+      } else {
+        print('Device tokens already contains thisDeviceToken');
+      }
+
+      usersCollection.doc(userDocId).update({'deviceTokens': deviceTokens});
 
       Provider.of<UserProvider>(context, listen: false).setValues(
         userInfo['name'],
         userInfo['userId'],
         userInfo['email'],
-        List<String>.from(snp.docs[0].data()['deviceTokens']),
-        List<String>.from(snp.docs[0].data()['dispensers']),
+        deviceTokens,
+        dispensers,
+        deviceToken: thisDeviceToken,
+        userDocId: userDocId,
       );
-      print('--------------------');
-      final providerObject = Provider.of<UserProvider>(context, listen: false);
-      print('Device Tokens: ${providerObject.deviceTokens}');
-      print('Name: ${providerObject.name}');
-      print('Email: ${providerObject.email}');
-      print('Dispensers: ${providerObject.dispensers}');
-      print('User Id: ${providerObject.userId}');
     });
 
     return StreamBuilder(
@@ -50,81 +111,6 @@ class HomeScreen extends StatelessWidget {
             dispenserSnapshot.data.docs;
         return HomeWidget(dispenserData);
       },
-    );
-  }
-}
-
-class HomeWidget extends StatefulWidget {
-  HomeWidget(this.dispenserData);
-  final List<QueryDocumentSnapshot> dispenserData;
-
-  @override
-  _HomeWidgetState createState() => _HomeWidgetState();
-}
-
-class _HomeWidgetState extends State<HomeWidget> {
-  bool menuOpened = false;
-
-  get appBar {
-    return AppBar(
-      backgroundColor: Colors.white,
-      shadowColor: Colors.white,
-      leading: Builder(
-        builder: (BuildContext context) {
-          return IconButton(
-            icon: Icon(
-              Icons.circle,
-              size: 30,
-              color: Theme.of(context).accentColor,
-            ),
-            onPressed: () {
-              setState(() {
-                menuOpened = !menuOpened;
-              });
-              // Navigator.pop(context);
-            },
-          );
-        },
-      ),
-      title: Text(
-        'HOME',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: menuOpened ? null : appBar,
-      body: Stack(
-        children: <Widget>[
-          Container(
-            margin: menuOpened
-                ? EdgeInsets.only(top: appBar.preferredSize.height)
-                : null,
-            child: ListView.builder(
-              itemCount: widget.dispenserData.length,
-              itemBuilder: (ctx, i) {
-                final Map<String, dynamic> currentDoc =
-                    widget.dispenserData[i].data();
-
-                return DispenserContainer(
-                  level: currentDoc['level'].toInt(),
-                  dispenserId: currentDoc['dispenserId'],
-                  location: currentDoc['location'],
-                );
-              },
-            ),
-          ),
-          OverlayMenu(() {
-            setState(() {
-              menuOpened = !menuOpened;
-            });
-          }, menuOpened)
-        ],
-      ),
     );
   }
 }

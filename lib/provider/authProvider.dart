@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:sanitiser_app/logged_in_pages/home_screen.dart';
-import 'package:sanitiser_app/splash_screen.dart';
+import 'package:sanitiser_app/provider/userProvider.dart';
+import 'package:provider/provider.dart';
 
 class AuthProvider with ChangeNotifier {
   final FirebaseAuth firebaseAuth;
@@ -11,18 +11,32 @@ class AuthProvider with ChangeNotifier {
   Stream<User> get authState => firebaseAuth.authStateChanges();
 
   //SIGN UP METHOD
-  Future<String> signUp(String email, String password, context) async {
+  Future<String> signUp({
+    @required String email,
+    @required String password,
+    @required BuildContext context,
+    @required String name,
+  }) async {
     print('Trying to sign up');
     print('Email: $email, password: $password');
     try {
-      await firebaseAuth.createUserWithEmailAndPassword(
+      final newUser = await firebaseAuth.createUserWithEmailAndPassword(
           email: email, password: password);
+
+      await FirebaseFirestore.instance.collection('users').add({
+        'name': name,
+        'email': email,
+        'deviceTokens': [],
+        'dispensers': [],
+        'userId': newUser.user.uid
+      });
+
       Navigator.pop(context);
       print('signed up!');
       return "Signed up!";
     } on FirebaseAuthException catch (e) {
       print('Error: $e');
-      return e.message;
+      throw e.message;
     }
   }
 
@@ -42,7 +56,24 @@ class AuthProvider with ChangeNotifier {
   }
 
   //SIGN OUT METHOD
-  Future<void> signOut() async {
+  Future<void> signOut(BuildContext context) async {
+    final deviceToken =
+        Provider.of<UserProvider>(context, listen: false).deviceToken;
+    final userDocId =
+        Provider.of<UserProvider>(context, listen: false).userDocId;
+    final firebaseDocData =
+        FirebaseFirestore.instance.collection('users').doc(userDocId);
+
     await firebaseAuth.signOut();
+
+    final userDoc = await firebaseDocData.get();
+    final deviceTokensList = List<String>.from(userDoc.data()['deviceTokens']);
+
+    deviceTokensList.remove(deviceToken);
+
+    firebaseDocData.update({'deviceTokens': deviceTokensList});
+
+    print('User document id: $userDocId');
+    print('device Token List: $deviceTokensList');
   }
 }

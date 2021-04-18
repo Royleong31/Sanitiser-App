@@ -36,41 +36,30 @@ class _SignupScreenState extends State<SignupScreen> {
       showSpinner = true;
     });
 
-    try {
-      // final newUser = await _auth.createUserWithEmailAndPassword(
-      //   email: _email,
-      //   password: _password,
-      // );
+    await Provider.of<AuthProvider>(context, listen: false).signUp(
+      email: _email,
+      password: _password,
+      context: context,
+      name: _name
+    ).catchError(
+      (err) {
+        print('Error message: $err');
 
-      // if (newUser != null) {
-      //   Navigator.of(context).pushNamed(HomeScreen.routeName);
-      //   print(newUser.user);
-      //   print(newUser.additionalUserInfo);
-      //   print(newUser.credential);
-      // }
-
-      // var userInfo = await firestore.collection('users').add({
-      //   '_name': _name,
-      //   'email': _email,
-      // });
-
-      // print('User Info: $userInfo');
-    } catch (err) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            err.toString().replaceRange(err.toString().indexOf('['),
-                err.toString().indexOf(']') + 2, ''),
-            textAlign: TextAlign.center,
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              err,
+              textAlign: TextAlign.center,
+            ),
+            backgroundColor: Theme.of(context).errorColor,
           ),
-          backgroundColor: Theme.of(context).errorColor,
-        ),
-      );
-    } finally {
-      setState(() {
-        showSpinner = false;
-      });
-    }
+        );
+      },
+    );
+
+    setState(() {
+      showSpinner = false;
+    });
   }
 
   @override
@@ -151,16 +140,9 @@ class _SignupScreenState extends State<SignupScreen> {
                           return null;
                         },
                       ),
-                      SizedBox(height: 50),
+                      SizedBox(height: 20),
                       ColoredWelcomeButton(() {
-                        // if (_onSaved()) _registerUser();
-                        if (_onSaved()) {
-                          setState(() {
-                            showSpinner = true;
-                          });
-                          Provider.of<AuthProvider>(context, listen: false)
-                              .signUp(_email, _password, context);
-                        }
+                        if (_onSaved()) _registerUser();
                       }, 'CREATE ACCOUNT')
                     ],
                   ),
