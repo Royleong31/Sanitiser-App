@@ -10,7 +10,7 @@ class CustomInputField extends StatelessWidget {
   Function validatorHandler;
 
   CustomInputField({
-    @required this.label,
+    this.label,
     this.saveHandler,
     this.obscureText: false,
     this.keyboardType,
