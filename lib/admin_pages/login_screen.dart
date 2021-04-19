@@ -21,7 +21,6 @@ class _LoginScreenState extends State<LoginScreen> {
   String _email, _password;
   bool showSpinner = false;
   final _formKey = GlobalKey<FormState>();
-  final _auth = FirebaseAuth.instance;
 
   bool _onSaved() {
     final isValid = _formKey.currentState.validate();
@@ -109,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       CustomInputField(
                         label: 'PASSWORD',
                         obscureText: true,
-                        saveHandler: (val) => _password = val.trim(),
+                        saveHandler: (val) => _password = val,
                         validatorHandler: (val) {
                           if (val.length < 6)
                             return 'Password needs to be at least 6 characters long';

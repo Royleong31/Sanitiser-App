@@ -1,28 +1,54 @@
 import 'package:flutter/foundation.dart';
 
 class UserProvider with ChangeNotifier {
-  String name, userId, email;
-  List<String> dispensers, deviceTokens;
-  String _thisDeviceToken, _userDocId;
+  String _name, _userId, _email, _thisDeviceToken, _userDocId;
+  List<String> _dispensers, _deviceTokens;
+  int _notificationLevel;
+  bool _notifyWhenRefilled;
 
-  UserProvider(
-      {this.name, this.userId, this.email, this.deviceTokens, this.dispensers});
-
-  void setValues(String _name, String _userId, String _email,
-      List<String> _deviceTokens, List<String> _dispensers,
-      {String deviceToken, String userDocId}) {
-    this.name = _name;
-    this.userId = _userId;
-    this.email = _email;
-    this.deviceTokens = _deviceTokens;
-    this.dispensers = _dispensers;
+  void setValues({
+    @required String name,
+    @required String userId,
+    @required String email,
+    @required List<String> deviceTokens,
+    @required List<String> dispensers,
+    @required String deviceToken,
+    @required String userDocId,
+    @required int notificationLevel,
+    @required bool notifyWhenRefilled,
+  }) {
+    this._name = name;
+    this._userId = userId;
+    this._email = email;
+    this._deviceTokens = deviceTokens;
+    this._dispensers = dispensers;
     this._thisDeviceToken = deviceToken;
     this._userDocId = userDocId;
+    this._notificationLevel = notificationLevel;
+    this._notifyWhenRefilled = notifyWhenRefilled;
   }
 
-  String get deviceToken {
-    return _thisDeviceToken;
-  }
-
+  String get deviceToken => _thisDeviceToken;
   String get userDocId => _userDocId;
+  String get name => _name;
+  String get userId => _userId;
+  String get email => _email;
+  int get notificationLevel => _notificationLevel;
+  bool get notifyWhenRefilled => _notifyWhenRefilled;
+
+  set setName(String newName) {
+    _name = newName;
+  }
+
+  set setEmail(String newEmail) {
+    _email = newEmail;
+  }
+
+  set setNotificationLevel(int newLevel) {
+    _notificationLevel = newLevel;
+  }
+
+  set setNotifyWhenRefilled(bool newNotify) {
+    _notifyWhenRefilled = newNotify;
+  }
 }

@@ -121,11 +121,25 @@ class OverlayMenu extends StatelessWidget {
                                   SizedBox(height: 50),
                                   Align(
                                     alignment: Alignment.center,
-                                    child: GeneralOutlinedButton('LOG OUT', () {
+                                    child: GeneralOutlinedButton('LOG OUT', () async {
                                       print('logging out');
-                                      Provider.of<AuthProvider>(context,
-                                              listen: false)
-                                          .signOut(context);
+                                      try {
+                                        await Provider.of<AuthProvider>(context,
+                                                listen: false)
+                                            .signOut(context);
+
+                                        
+                                      } catch (e) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                          backgroundColor:
+                                              Theme.of(context).errorColor,
+                                          content: Text(
+                                            'Error signing out',
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ));
+                                      }
                                     }),
                                   ),
                                 ],

@@ -31,17 +31,15 @@ class _SignupScreenState extends State<SignupScreen> {
     return true;
   }
 
-  void _registerUser() async {
+  void _registerUser() {
     setState(() {
       showSpinner = true;
     });
 
-    await Provider.of<AuthProvider>(context, listen: false).signUp(
-      email: _email,
-      password: _password,
-      context: context,
-      name: _name
-    ).catchError(
+    Provider.of<AuthProvider>(context, listen: false)
+        .signUp(
+            email: _email, password: _password, context: context, name: _name)
+        .catchError(
       (err) {
         print('Error message: $err');
 
@@ -55,11 +53,7 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
         );
       },
-    );
-
-    setState(() {
-      showSpinner = false;
-    });
+    ).whenComplete(() => setState(() => showSpinner = false));
   }
 
   @override
@@ -122,7 +116,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       CustomInputField(
                         label: 'PASSWORD',
                         obscureText: true,
-                        saveHandler: (val) => _password = val.trim(),
+                        saveHandler: (val) => _password = val,
                         controller: _passwordController,
                         validatorHandler: (val) {
                           if (val.length < 6)
@@ -131,7 +125,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         },
                       ),
                       CustomInputField(
-                        label: 'VERIFY PASSWORD',
+                        label: 'COMFIRM PASSWORD',
                         obscureText: true,
                         validatorHandler: (val) {
                           if (val.isEmpty || val != _passwordController.text) {

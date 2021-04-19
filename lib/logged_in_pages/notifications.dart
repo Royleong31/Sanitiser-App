@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sanitiser_app/models/const.dart';
+import 'package:sanitiser_app/provider/userProvider.dart';
 import 'package:sanitiser_app/widgets/CircleThumbShape.dart';
 import 'package:sanitiser_app/widgets/CustomInputField.dart';
 import 'package:sanitiser_app/widgets/GeneralButton.dart';
@@ -14,9 +16,10 @@ class Notifications extends StatefulWidget {
 
 class _NotificationsState extends State<Notifications> {
   bool menuOpened = false;
-  int refillLevel = 10;
-  bool notifyWhenRefilled = true;
+  bool notifyWhenRefilled;
   String refillDisabled = 'ENABLED';
+  int notificationLevel;
+  UserProvider userProviderInfo;
 
   get appBar {
     return AppBar(
@@ -43,6 +46,15 @@ class _NotificationsState extends State<Notifications> {
         style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    userProviderInfo = Provider.of<UserProvider>(context, listen: false);
+
+    notificationLevel = userProviderInfo.notificationLevel;
+    notifyWhenRefilled = userProviderInfo.notifyWhenRefilled;
   }
 
   @override
@@ -91,7 +103,7 @@ class _NotificationsState extends State<Notifications> {
                             width: 58,
                             height: 40,
                             child: Center(
-                                child: Text('$refillLevel%',
+                                child: Text('$notificationLevel%',
                                     style: klabelTextStyle)),
                           ),
                           SizedBox(height: 16),
@@ -106,12 +118,12 @@ class _NotificationsState extends State<Notifications> {
                                 inactiveTrackColor: kLightGreyColor,
                                 thumbColor: Colors.white),
                             child: Slider(
-                              value: refillLevel.toDouble(),
+                              value: notificationLevel.toDouble(),
                               min: 1,
                               max: 99,
                               onChanged: (double newVal) {
                                 setState(() {
-                                  refillLevel = newVal.round();
+                                  notificationLevel = newVal.round();
                                 });
                               },
                             ),
@@ -154,14 +166,21 @@ class _NotificationsState extends State<Notifications> {
                                 style: TextStyle(
                                     decoration: TextDecoration.underline,
                                     color: Colors.black54,
-                                    fontSize: 12),
+                                    fontSize: 10),
                               ),
                             ]),
                             SizedBox(width: 5),
                           ],
                         )),
                     Expanded(child: Container()),
-                    GeneralButton('SAVE', kNormalColor, () {}),
+                    GeneralButton('SAVE', kNormalColor, () {
+                      print('Notification Level: $notificationLevel');
+                      print('Notify when refilled: $notifyWhenRefilled');
+                      userProviderInfo.setNotificationLevel = notificationLevel;
+
+                      userProviderInfo.setNotifyWhenRefilled =
+                          notifyWhenRefilled;
+                    }),
                     SizedBox(height: 15),
                     GeneralButton('BACK', kLightGreyColor, () {}),
                     SizedBox(height: 80),

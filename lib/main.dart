@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTap: () {
           FocusScope.of(context).requestFocus(FocusNode());
+          FocusManager.instance.primaryFocus.unfocus();
         },
         child: MaterialApp(
             debugShowCheckedModeBanner: false,

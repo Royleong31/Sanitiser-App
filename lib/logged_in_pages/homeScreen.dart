@@ -65,6 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     String userId = FirebaseAuth.instance.currentUser.uid;
@@ -76,10 +78,11 @@ class _HomeScreenState extends State<HomeScreen> {
         .get()
         .then((QuerySnapshot snp) {
       Map<String, dynamic> userInfo = snp.docs[0].data();
+
       userDocId = snp.docs[0].id;
-      final deviceTokens =
-          List<String>.from(snp.docs[0].data()['deviceTokens']);
-      final dispensers = List<String>.from(snp.docs[0].data()['dispensers']);
+
+      final deviceTokens = List<String>.from(userInfo['deviceTokens']);
+      final dispensers = List<String>.from(userInfo['dispensers']);
 
       if (!deviceTokens.contains(thisDeviceToken)) {
         deviceTokens.add(thisDeviceToken);
@@ -91,11 +94,13 @@ class _HomeScreenState extends State<HomeScreen> {
       usersCollection.doc(userDocId).update({'deviceTokens': deviceTokens});
 
       Provider.of<UserProvider>(context, listen: false).setValues(
-        userInfo['name'],
-        userInfo['userId'],
-        userInfo['email'],
-        deviceTokens,
-        dispensers,
+        name: userInfo['name'],
+        userId: userInfo['userId'],
+        email: userInfo['email'],
+        notificationLevel: userInfo['notificationLevel'],
+        notifyWhenRefilled: userInfo['notifyWhenRefilled'],
+        deviceTokens: deviceTokens,
+        dispensers: dispensers,
         deviceToken: thisDeviceToken,
         userDocId: userDocId,
       );

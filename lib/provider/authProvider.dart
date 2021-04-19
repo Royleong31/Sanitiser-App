@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:sanitiser_app/admin_pages/welcome_screen.dart';
+import 'package:sanitiser_app/logged_in_pages/homeScreen.dart';
 import 'package:sanitiser_app/provider/userProvider.dart';
 import 'package:provider/provider.dart';
 
@@ -8,7 +10,7 @@ class AuthProvider with ChangeNotifier {
   final FirebaseAuth firebaseAuth;
   AuthProvider(this.firebaseAuth);
 
-  Stream<User> get authState => firebaseAuth.authStateChanges();
+  Stream<User> get authState => firebaseAuth.idTokenChanges();
 
   //SIGN UP METHOD
   Future<String> signUp({
@@ -28,7 +30,9 @@ class AuthProvider with ChangeNotifier {
         'email': email,
         'deviceTokens': [],
         'dispensers': [],
-        'userId': newUser.user.uid
+        'userId': newUser.user.uid,
+        'notificationLevel': 10, // DEFAULT NOTIFICATION LEVEL IS 10%
+        'notifyWhenRefilled': true,
       });
 
       Navigator.pop(context);
@@ -45,7 +49,7 @@ class AuthProvider with ChangeNotifier {
     print('Trying to sign in');
     print('Email: $email, password: $password');
     try {
-      final user = await firebaseAuth.signInWithEmailAndPassword(
+      await firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password);
       Navigator.pop(context);
       return "Signed in!";
@@ -72,8 +76,12 @@ class AuthProvider with ChangeNotifier {
     deviceTokensList.remove(deviceToken);
 
     firebaseDocData.update({'deviceTokens': deviceTokensList});
+    notifyListeners();
 
     print('User document id: $userDocId');
     print('device Token List: $deviceTokensList');
+
+    await Navigator.of(context).pushNamedAndRemoveUntil(
+        '/', ModalRoute.withName(WelcomeScreen.routeName));
   }
 }

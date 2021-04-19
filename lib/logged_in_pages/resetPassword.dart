@@ -13,6 +13,23 @@ class ResetPassword extends StatefulWidget {
 
 class _ResetPasswordState extends State<ResetPassword> {
   bool menuOpened = false;
+  String _oldPassword, _newPassword;
+  final _formKey = GlobalKey<FormState>();
+  final _passwordController = TextEditingController();
+
+  bool _onSaved() {
+    final isValid = _formKey.currentState.validate();
+    if (!isValid) return false;
+    _formKey.currentState.save();
+    print(
+        'Old Password Value: $_oldPassword, New Password Value: $_newPassword');
+
+    return true;
+  }
+
+  void _changePassword() {
+    // ADD CHANGE THE PROVIDER AND THE AUTH DETAILS FOR THIS USER
+  }
 
   get appBar {
     return AppBar(
@@ -55,37 +72,61 @@ class _ResetPasswordState extends State<ResetPassword> {
                         MediaQuery.of(context).padding.top)
                 : null,
             child: SingleChildScrollView(
-              child: Container(
-                height: MediaQuery.of(context).size.height -
-                    AppBar().preferredSize.height -
-                    MediaQuery.of(context).padding.top,
-                child: Column(
-                  children: [
-                    Container(
-                      child: Column(
-                        children: [
-                          SizedBox(height: 80),
-                          CustomInputField(
-                            label: 'OLD PASSWORD',
-                            saveHandler: (_) {},
-                          ),
-                          CustomInputField(
-                            label: 'NEW PASSWORD',
-                            saveHandler: (_) {},
-                          ),
-                          CustomInputField(
-                            label: 'CONFIRM NEW PASSWORD',
-                            saveHandler: (_) {},
-                          ),
-                        ],
+              child: Form(
+                key: _formKey,
+                child: Container(
+                  height: MediaQuery.of(context).size.height -
+                      AppBar().preferredSize.height -
+                      MediaQuery.of(context).padding.top,
+                  child: Column(
+                    children: [
+                      Container(
+                        child: Column(
+                          children: [
+                            SizedBox(height: 80),
+                            CustomInputField(
+                                label: 'OLD PASSWORD',
+                                obscureText: true,
+                                saveHandler: (val) => _oldPassword = val,
+                                validatorHandler: (val) {
+                                  if (val.length < 6)
+                                    return 'Password needs to be at least 6 characters long';
+                                  return null;
+                                }),
+                            CustomInputField(
+                              label: 'NEW PASSWORD',
+                              obscureText: true,
+                              controller: _passwordController,
+                              saveHandler: (val) => _newPassword = val,
+                              validatorHandler: (val) {
+                                if (val.length < 6)
+                                  return 'Password needs to be at least 6 characters long';
+                                return null;
+                              },
+                            ),
+                            CustomInputField(
+                              label: 'CONFIRM NEW PASSWORD',
+                              obscureText: true,
+                              validatorHandler: (val) {
+                                if (val.isEmpty ||
+                                    val != _passwordController.text) {
+                                  return 'Passwords do not match';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Expanded(child: Container()),
-                    GeneralButton('SAVE', kNormalColor, () {}),
-                    SizedBox(height: 15),
-                    GeneralButton('BACK', kLightGreyColor, () {}),
-                    SizedBox(height: 80),
-                  ],
+                      Expanded(child: Container()),
+                      GeneralButton('SAVE', kNormalColor, () {
+                        if (_onSaved()) _changePassword();
+                      }),
+                      SizedBox(height: 15),
+                      GeneralButton('BACK', kLightGreyColor, () {}),
+                      SizedBox(height: 80),
+                    ],
+                  ),
                 ),
               ),
             ),
