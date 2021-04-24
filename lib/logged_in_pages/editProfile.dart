@@ -1,4 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitiser_app/models/const.dart';
@@ -15,27 +16,64 @@ class EditProfile extends StatefulWidget {
   _EditProfileState createState() => _EditProfileState();
 }
 
-class _EditProfileState extends State<EditProfile> {
+class _EditProfileState extends State<EditProfile>
+    with SingleTickerProviderStateMixin {
   bool menuOpened = false;
-  String _name, _email;
+  bool isEditName = true;
+  bool showPasswordInfo = false;
+  List<String> changeMenuText = [
+    'RESET PASSWORD INSTEAD',
+    'CHANGE NAME INSTEAD'
+  ];
+  String _name, _newPassword, _oldPassword;
+  final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  AnimationController _controller;
+  Animation<double> _opacityAnimation;
+  Animation<double> _alwaysVisibleOpacityAnimation;
+  var _slideAnimation;
+
+  @override
+  void initState() {
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 300),
+    );
+
+    _slideAnimation = Tween<Offset>(begin: Offset(0, -1.5), end: Offset(0, 0))
+        .animate(
+            CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn));
+
+    _opacityAnimation = Tween(begin: 0.0, end: 1.0)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+
+    _alwaysVisibleOpacityAnimation = Tween(begin: 1.0, end: 1.0)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   bool _onSaved() {
     final isValid = _formKey.currentState.validate();
     if (!isValid) return false;
     _formKey.currentState.save();
-    print('Name Value: $_name, Email Value: $_email');
+    print('Name Value: $_name');
+    print('Old Password Value: $_oldPassword');
+    print('New Password Value: $_newPassword');
 
     return true;
   }
 
-  Future<void> _editProfileDetails() async {
-    final userProviderDetails =
-        Provider.of<UserProvider>(context, listen: false);
-    userProviderDetails.setEmail = _email;
-    userProviderDetails.setName = _name;
-
-    if (await setNameAndEmail(context, name: _name, email: _email)) {
+  Future<void> _editName() async {
+    print('editing name');
+    if (await Provider.of<UserProvider>(context, listen: false)
+        .setFirebaseName(context, _name)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.lightGreen,
@@ -58,27 +96,11 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
-  Future<bool> setNameAndEmail(BuildContext context,
-      {@required String name, @required String email}) async {
-    try {
-      final userDocId =
-          Provider.of<UserProvider>(context, listen: false).userDocId;
-      final firebaseDocData =
-          FirebaseFirestore.instance.collection('users').doc(userDocId);
-
-      print(firebaseDocData);
-
-      print("New name: $name");
-      print("New email: $email");
-      // IMPT NEED TO UPDATE EMAIL IN AUTH AS CURRENTLY ONLY UPDATE FIRESTORE
-
-      await firebaseDocData.update({'name': name, 'email': email});
-
-      return true;
-    } catch (err) {
-      print(err);
-      return false;
-    }
+  Future<void> _editPassword() {
+    print('editing password');
+    Provider.of<AuthProvider>(context, listen: false)
+        .changePassword(_oldPassword, _newPassword);
+    return null;
   }
 
   get appBar {
@@ -132,35 +154,104 @@ class _EditProfileState extends State<EditProfile> {
                       MediaQuery.of(context).padding.top,
                   child: Column(
                     children: [
-                      Container(
+                      SizedBox(height: 80),
+                      AnimatedContainer(
+                        duration: Duration(milliseconds: 200),
+                        curve: Curves.ease,
+                        height: isEditName ? 95 : 300,
                         child: Column(
                           children: [
-                            SizedBox(height: 80),
-                            CustomInputField(
-                              label: 'NAME',
-                              initialValue: userProviderDetails.name,
-                              saveHandler: (val) => _name = val.trim(),
-                            ),
-                            CustomInputField(
-                              label: 'EMAIL',
-                              keyboardType: TextInputType.emailAddress,
-                              initialValue: userProviderDetails.email,
-                              saveHandler: (val) => _email = val.trim(),
-                              validatorHandler: (val) {
-                                if (!val.contains('@') || !val.contains('.com'))
-                                  return 'Please enter a valid email address';
-                                return null;
-                              },
-                            ),
+                            if (!showPasswordInfo) // IF EDITING NAME
+                              CustomInputField(
+                                label: 'NAME',
+                                initialValue: userProviderDetails.name,
+                                saveHandler: (val) => _name = val.trim(),
+                              ),
+                            if (showPasswordInfo) // IF EDITING PASSWORD
+                              Column(children: [
+                                FadeTransition(
+                                  opacity: _alwaysVisibleOpacityAnimation,
+                                  child: CustomInputField(
+                                    label: 'OLD PASSWORD',
+                                    obscureText: true,
+                                    saveHandler: (val) => _oldPassword = val,
+                                    validatorHandler: (val) {
+                                      if (val.length < 6)
+                                        return 'Password needs to be at least 6 characters long';
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                SlideTransition(
+                                  position: _slideAnimation,
+                                  child: FadeTransition(
+                                    opacity: _opacityAnimation,
+                                    child: CustomInputField(
+                                      label: 'NEW PASSWORD',
+                                      obscureText: true,
+                                      saveHandler: (val) => _newPassword = val,
+                                      controller: _passwordController,
+                                      validatorHandler: (val) {
+                                        if (val.length < 6)
+                                          return 'Password needs to be at least 6 characters long';
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                SlideTransition(
+                                  position: _slideAnimation,
+                                  child: FadeTransition(
+                                    opacity: _opacityAnimation,
+                                    child: CustomInputField(
+                                      label: 'CONFIRM NEW PASSWORD',
+                                      obscureText: true,
+                                      validatorHandler: (val) {
+                                        if (val.isEmpty ||
+                                            val != _passwordController.text) {
+                                          return 'Passwords do not match';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ]),
                           ],
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          _passwordController.clear();
+                          if (isEditName) {
+                            setState(() {
+                              isEditName = false;
+                              Timer(Duration(milliseconds: 150), () {
+                                setState(() {
+                                  showPasswordInfo = true;
+                                  _controller.forward();
+                                });
+                              });
+                            });
+                          } else {
+                            setState(() {
+                              isEditName = true;
+                              showPasswordInfo = false;
+                              _controller.reverse();
+                            });
+                          }
+                        },
+                        child: Text(
+                          changeMenuText[isEditName ? 0 : 1],
+                          style: TextStyle(color: Colors.black, fontSize: 14),
                         ),
                       ),
                       Expanded(child: Container()),
                       GeneralButton('SAVE', kNormalColor, () {
-                        if (_onSaved()) _editProfileDetails();
+                        if (_onSaved() && isEditName)
+                          _editName();
+                        else if (_onSaved() && !isEditName) _editPassword();
                       }),
-                      SizedBox(height: 15),
-                      GeneralButton('BACK', kLightGreyColor, () {}),
                       SizedBox(height: 80),
                     ],
                   ),

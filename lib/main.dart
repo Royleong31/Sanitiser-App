@@ -72,7 +72,6 @@ class MyApp extends StatelessWidget {
               HomeScreen.routeName: (ctx) => HomeScreen(),
               EditProfile.routeName: (ctx) => EditProfile(),
               Notifications.routeName: (ctx) => Notifications(),
-              ResetPassword.routeName: (ctx) => ResetPassword(),
               EditDevices.routeName: (ctx) => EditDevices(),
             }),
       ),
@@ -88,7 +87,6 @@ class Authenticate extends StatelessWidget {
 
     if (firebaseUser != null) {
       print('home is homescreen');
-
       return HomeScreen();
     }
 

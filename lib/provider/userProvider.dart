@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 class UserProvider with ChangeNotifier {
   String _name, _userId, _email, _thisDeviceToken, _userDocId;
@@ -50,5 +52,25 @@ class UserProvider with ChangeNotifier {
 
   set setNotifyWhenRefilled(bool newNotify) {
     _notifyWhenRefilled = newNotify;
+  }
+
+  Future<bool> setFirebaseName(BuildContext context, String name) async {
+    try {
+      final firebaseDocData =
+          FirebaseFirestore.instance.collection('users').doc(userDocId);
+
+      _name = name;
+
+      print(firebaseDocData);
+
+      print("New name: $name");
+
+      await firebaseDocData.update({'name': name});
+
+      return true;
+    } catch (err) {
+      print(err);
+      return false;
+    }
   }
 }

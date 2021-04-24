@@ -122,8 +122,6 @@ class _ResetPasswordState extends State<ResetPassword> {
                       GeneralButton('SAVE', kNormalColor, () {
                         if (_onSaved()) _changePassword();
                       }),
-                      SizedBox(height: 15),
-                      GeneralButton('BACK', kLightGreyColor, () {}),
                       SizedBox(height: 80),
                     ],
                   ),

@@ -1,11 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sanitiser_app/admin_pages/welcome_screen.dart';
-import 'package:sanitiser_app/logged_in_pages/homeScreen.dart';
-import 'package:sanitiser_app/main.dart';
 import 'package:sanitiser_app/provider/authProvider.dart';
-import 'package:sanitiser_app/splash_screen.dart';
 import 'package:sanitiser_app/widgets/ColoredWelcomeButton.dart';
 import 'package:sanitiser_app/widgets/CustomInputField.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';

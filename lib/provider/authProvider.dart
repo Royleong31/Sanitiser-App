@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sanitiser_app/admin_pages/welcome_screen.dart';
-import 'package:sanitiser_app/logged_in_pages/homeScreen.dart';
 import 'package:sanitiser_app/provider/userProvider.dart';
 import 'package:provider/provider.dart';
 
@@ -83,5 +82,34 @@ class AuthProvider with ChangeNotifier {
 
     await Navigator.of(context).pushNamedAndRemoveUntil(
         '/', ModalRoute.withName(WelcomeScreen.routeName));
+  }
+
+  Future<bool> changePassword(String oldPassword, String newpassword) async {
+    //Create an instance of the current user.
+    User user = firebaseAuth.currentUser;
+
+    //Pass in the password to updatePassword.
+    try {
+      final authResult = await user.reauthenticateWithCredential(
+        EmailAuthProvider.credential(
+          email: user.email,
+          password: oldPassword,
+        ),
+      );
+      print('Auth Result: $authResult');
+
+      await user.updatePassword(newpassword);
+      return true;
+    } catch (err) {
+      print("Password can't be changed" + err.toString());
+      return false;
+    }
+    // user.updatePassword(newpassword).then((_) {
+    //   print("Successfully changed password");
+    //   return true;
+    // }).catchError((error) {
+    //   print("Password can't be changed" + error.toString());
+    //   //This might happen, when the wrong password is in, the user isn't found, or if the user hasn't logged in recently.
+    // });
   }
 }

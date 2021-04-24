@@ -181,8 +181,7 @@ class _NotificationsState extends State<Notifications> {
                       userProviderInfo.setNotifyWhenRefilled =
                           notifyWhenRefilled;
                     }),
-                    SizedBox(height: 15),
-                    GeneralButton('BACK', kLightGreyColor, () {}),
+   
                     SizedBox(height: 80),
                   ],
                 ),

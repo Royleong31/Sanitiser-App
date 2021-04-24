@@ -75,7 +75,8 @@ class OverlayMenu extends StatelessWidget {
                                   Consumer<UserProvider>(
                                     builder: (BuildContext ctx, userData, _) =>
                                         Text(
-                                      'WELCOME \n${userData.name}',
+                                      'WELCOME \n${userData.name}'
+                                          .toUpperCase(),
                                       style: TextStyle(
                                         fontSize: 30,
                                         fontWeight: FontWeight.w400,
@@ -105,30 +106,22 @@ class OverlayMenu extends StatelessWidget {
                                     },
                                   ),
                                   MenuButton(
-                                    title: 'RESET PASSWORD',
-                                    onPressed: () {
-                                      Navigator.pushReplacementNamed(
-                                          context, ResetPassword.routeName);
-                                    },
-                                  ),
-                                  MenuButton(
                                     title: 'EDIT DEVICES',
                                     onPressed: () {
                                       Navigator.pushReplacementNamed(
                                           context, EditDevices.routeName);
                                     },
                                   ),
-                                  SizedBox(height: 50),
+                                  SizedBox(height: 70),
                                   Align(
                                     alignment: Alignment.center,
-                                    child: GeneralOutlinedButton('LOG OUT', () async {
+                                    child: GeneralOutlinedButton('LOG OUT',
+                                        () async {
                                       print('logging out');
                                       try {
                                         await Provider.of<AuthProvider>(context,
                                                 listen: false)
                                             .signOut(context);
-
-                                        
                                       } catch (e) {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(

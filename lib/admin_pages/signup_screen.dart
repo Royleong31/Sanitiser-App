@@ -1,10 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitiser_app/provider/authProvider.dart';
 import 'package:sanitiser_app/widgets/ColoredWelcomeButton.dart';
 import 'package:sanitiser_app/widgets/CustomInputField.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -18,9 +16,7 @@ class _SignupScreenState extends State<SignupScreen> {
   String _name, _email, _password;
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final _auth = FirebaseAuth.instance;
   bool showSpinner = false;
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   bool _onSaved() {
     final isValid = _formKey.currentState.validate();
