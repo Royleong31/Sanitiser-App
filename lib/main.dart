@@ -7,7 +7,6 @@ import 'package:sanitiser_app/admin_pages/login_screen.dart';
 import 'package:sanitiser_app/admin_pages/signup_screen.dart';
 import 'package:sanitiser_app/logged_in_pages/editProfile.dart';
 import 'package:sanitiser_app/logged_in_pages/homeScreen.dart';
-import 'package:sanitiser_app/logged_in_pages/resetPassword.dart';
 import 'package:sanitiser_app/provider/authProvider.dart';
 import './models/custom_route.dart';
 

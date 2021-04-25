@@ -8,6 +8,7 @@ class CustomInputField extends StatelessWidget {
   final TextInputType keyboardType;
   final TextEditingController controller;
   final String initialValue;
+  final Widget suffixIcon;
   Function validatorHandler;
 
   CustomInputField({
@@ -18,6 +19,7 @@ class CustomInputField extends StatelessWidget {
     this.validatorHandler,
     this.controller,
     this.initialValue,
+    this.suffixIcon,
   }) {
     if (validatorHandler == null) {
       validatorHandler = (String val) {
@@ -52,6 +54,7 @@ class CustomInputField extends StatelessWidget {
             ),
             cursorColor: Colors.black,
             decoration: InputDecoration(
+              suffixIcon: suffixIcon,
               helperText: ' ',
               filled: true,
               fillColor: Colors.transparent,

@@ -249,7 +249,45 @@ void addDeviceDialog(BuildContext context) {
                     ),
                     SizedBox(height: 20),
                     CustomInputField(label: 'LOCATION'),
-                    CustomInputField(label: 'DISPENSER ID'),
+                    Stack(
+                      alignment: Alignment.centerRight,
+                      children: [
+                        CustomInputField(
+                          label: 'DISPENSER ID',
+                          // suffixIcon: GestureDetector(
+                          //   onTap: () {
+                          //     FocusScopeNode currentFocus = FocusScope.of(context);
+                          //     currentFocus.unfocus();
+                          //     // if (!currentFocus.hasPrimaryFocus) {
+                          //     //   currentFocus.unfocus();
+                          //     // }
+                          //     print('opening qr code scanner');
+                          //   },
+                          //   child: Icon(
+                          //     Icons.qr_code_scanner_sharp,
+                          //     color: Colors.black,
+                          //     size: 30,
+                          //   ),
+                          // ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            FocusScopeNode currentFocus =
+                                FocusScope.of(context);
+                            currentFocus.unfocus();
+                            // if (!currentFocus.hasPrimaryFocus) {
+                            //   currentFocus.unfocus();
+                            // }
+                            print('opening qr code scanner');
+                          },
+                          child: Icon(
+                            Icons.qr_code_scanner_sharp,
+                            color: Colors.black,
+                            size: 30,
+                          ),
+                        ),
+                      ],
+                    ),
                     SizedBox(height: 30),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

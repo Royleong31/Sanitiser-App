@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitiser_app/models/const.dart';
 import 'package:sanitiser_app/provider/authProvider.dart';
@@ -20,6 +21,7 @@ class _EditProfileState extends State<EditProfile>
     with SingleTickerProviderStateMixin {
   bool menuOpened = false;
   bool isEditName = true;
+  bool showSpinner = false;
   bool showPasswordInfo = false;
   List<String> changeMenuText = [
     'RESET PASSWORD INSTEAD',
@@ -27,6 +29,8 @@ class _EditProfileState extends State<EditProfile>
   ];
   String _name, _newPassword, _oldPassword;
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _oldPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   AnimationController _controller;
   Animation<double> _opacityAnimation;
@@ -70,37 +74,83 @@ class _EditProfileState extends State<EditProfile>
     return true;
   }
 
+  void _clearPasswordControllers() {
+    _confirmPasswordController.clear();
+    _passwordController.clear();
+    _oldPasswordController.clear();
+  }
+
   Future<void> _editName() async {
     print('editing name');
-    if (await Provider.of<UserProvider>(context, listen: false)
-        .setFirebaseName(context, _name)) {
+    try {
+      setState(() {
+        showSpinner = true;
+      });
+      await Provider.of<UserProvider>(context, listen: false)
+          .setName(context, _name);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.lightGreen,
           content: Text(
-            'Successsfully updated the database',
+            'Successsfully changed name',
             textAlign: TextAlign.center,
           ),
         ),
       );
-    } else {
+    } catch (err) {
+      print(err.message);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Theme.of(context).errorColor,
           content: Text(
-            'A problem occured, please try again',
+            err.message,
             textAlign: TextAlign.center,
           ),
         ),
       );
+    } finally {
+      setState(() {
+        showSpinner = false;
+      });
     }
   }
 
-  Future<void> _editPassword() {
+  Future<void> _editPassword() async {
     print('editing password');
-    Provider.of<AuthProvider>(context, listen: false)
-        .changePassword(_oldPassword, _newPassword);
-    return null;
+    try {
+      setState(() {
+        showSpinner = true;
+      });
+      await Provider.of<AuthProvider>(context, listen: false)
+          .changePassword(_oldPassword, _newPassword);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.lightGreen,
+          content: Text(
+            'Successsfully changed password',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+      _clearPasswordControllers();
+    } catch (err) {
+      print(err.message);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Theme.of(context).errorColor,
+          content: Text(
+            err.message,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    } finally {
+      setState(() {
+        showSpinner = false;
+      });
+    }
   }
 
   get appBar {
@@ -134,63 +184,50 @@ class _EditProfileState extends State<EditProfile>
   Widget build(BuildContext context) {
     final userProviderDetails = Provider.of<UserProvider>(context);
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: menuOpened ? null : appBar,
-      body: Stack(
-        children: <Widget>[
-          Container(
-            margin: menuOpened
-                ? EdgeInsets.only(
-                    top: appBar.preferredSize.height +
-                        MediaQuery.of(context).padding.top)
-                : null,
-            child: SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Container(
-                  height: MediaQuery.of(context).size.height -
-                      AppBar().preferredSize.height -
-                      MediaQuery.of(context).padding.top,
-                  child: Column(
-                    children: [
-                      SizedBox(height: 80),
-                      AnimatedContainer(
-                        duration: Duration(milliseconds: 200),
-                        curve: Curves.ease,
-                        height: isEditName ? 95 : 300,
-                        child: Column(
-                          children: [
-                            if (!showPasswordInfo) // IF EDITING NAME
-                              CustomInputField(
-                                label: 'NAME',
-                                initialValue: userProviderDetails.name,
-                                saveHandler: (val) => _name = val.trim(),
-                              ),
-                            if (showPasswordInfo) // IF EDITING PASSWORD
-                              Column(children: [
-                                FadeTransition(
-                                  opacity: _alwaysVisibleOpacityAnimation,
-                                  child: CustomInputField(
-                                    label: 'OLD PASSWORD',
-                                    obscureText: true,
-                                    saveHandler: (val) => _oldPassword = val,
-                                    validatorHandler: (val) {
-                                      if (val.length < 6)
-                                        return 'Password needs to be at least 6 characters long';
-                                      return null;
-                                    },
-                                  ),
+    return ModalProgressHUD(
+      inAsyncCall: showSpinner,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: menuOpened ? null : appBar,
+        body: Stack(
+          children: <Widget>[
+            Container(
+              margin: menuOpened
+                  ? EdgeInsets.only(
+                      top: appBar.preferredSize.height +
+                          MediaQuery.of(context).padding.top)
+                  : null,
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Container(
+                    height: MediaQuery.of(context).size.height -
+                        AppBar().preferredSize.height -
+                        MediaQuery.of(context).padding.top,
+                    child: Column(
+                      children: [
+                        SizedBox(height: 80),
+                        AnimatedContainer(
+                          duration: Duration(milliseconds: 200),
+                          curve: Curves.ease,
+                          height: isEditName ? 95 : 300,
+                          child: Column(
+                            children: [
+                              if (!showPasswordInfo) // IF EDITING NAME
+                                CustomInputField(
+                                  label: 'NAME',
+                                  initialValue: userProviderDetails.name,
+                                  saveHandler: (val) => _name = val.trim(),
                                 ),
-                                SlideTransition(
-                                  position: _slideAnimation,
-                                  child: FadeTransition(
-                                    opacity: _opacityAnimation,
+                              if (showPasswordInfo) // IF EDITING PASSWORD
+                                Column(children: [
+                                  FadeTransition(
+                                    opacity: _alwaysVisibleOpacityAnimation,
                                     child: CustomInputField(
-                                      label: 'NEW PASSWORD',
+                                      label: 'CURRENT PASSWORD',
+                                      controller: _oldPasswordController,
                                       obscureText: true,
-                                      saveHandler: (val) => _newPassword = val,
-                                      controller: _passwordController,
+                                      saveHandler: (val) => _oldPassword = val,
                                       validatorHandler: (val) {
                                         if (val.length < 6)
                                           return 'Password needs to be at least 6 characters long';
@@ -198,73 +235,94 @@ class _EditProfileState extends State<EditProfile>
                                       },
                                     ),
                                   ),
-                                ),
-                                SlideTransition(
-                                  position: _slideAnimation,
-                                  child: FadeTransition(
-                                    opacity: _opacityAnimation,
-                                    child: CustomInputField(
-                                      label: 'CONFIRM NEW PASSWORD',
-                                      obscureText: true,
-                                      validatorHandler: (val) {
-                                        if (val.isEmpty ||
-                                            val != _passwordController.text) {
-                                          return 'Passwords do not match';
-                                        }
-                                        return null;
-                                      },
+                                  SlideTransition(
+                                    position: _slideAnimation,
+                                    child: FadeTransition(
+                                      opacity: _opacityAnimation,
+                                      child: CustomInputField(
+                                        label: 'NEW PASSWORD',
+                                        obscureText: true,
+                                        saveHandler: (val) =>
+                                            _newPassword = val,
+                                        controller: _passwordController,
+                                        validatorHandler: (val) {
+                                          if (val.length < 6)
+                                            return 'Password needs to be at least 6 characters long';
+                                          return null;
+                                        },
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ]),
-                          ],
+                                  SlideTransition(
+                                    position: _slideAnimation,
+                                    child: FadeTransition(
+                                      opacity: _opacityAnimation,
+                                      child: CustomInputField(
+                                        label: 'CONFIRM NEW PASSWORD',
+                                        obscureText: true,
+                                        controller: _confirmPasswordController,
+                                        validatorHandler: (val) {
+                                          if (val.isEmpty ||
+                                              val != _passwordController.text) {
+                                            return 'Passwords do not match';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ]),
+                            ],
+                          ),
                         ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          _passwordController.clear();
-                          if (isEditName) {
-                            setState(() {
-                              isEditName = false;
-                              Timer(Duration(milliseconds: 150), () {
-                                setState(() {
-                                  showPasswordInfo = true;
-                                  _controller.forward();
+                        TextButton(
+                          onPressed: () {
+                            _clearPasswordControllers();
+                            if (isEditName) {
+                              setState(() {
+                                isEditName = false;
+                                Timer(Duration(milliseconds: 150), () {
+                                  setState(() {
+                                    showPasswordInfo = true;
+                                    _controller.forward();
+                                  });
                                 });
                               });
-                            });
-                          } else {
-                            setState(() {
-                              isEditName = true;
-                              showPasswordInfo = false;
-                              _controller.reverse();
-                            });
-                          }
-                        },
-                        child: Text(
-                          changeMenuText[isEditName ? 0 : 1],
-                          style: TextStyle(color: Colors.black, fontSize: 14),
+                            } else {
+                              setState(() {
+                                isEditName = true;
+                                showPasswordInfo = false;
+                                _controller.reverse();
+                              });
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                              backgroundColor: kOffWhiteColor),
+                          child: Text(
+                            changeMenuText[isEditName ? 0 : 1],
+                            style: TextStyle(color: Colors.black, fontSize: 12),
+                          ),
                         ),
-                      ),
-                      Expanded(child: Container()),
-                      GeneralButton('SAVE', kNormalColor, () {
-                        if (_onSaved() && isEditName)
-                          _editName();
-                        else if (_onSaved() && !isEditName) _editPassword();
-                      }),
-                      SizedBox(height: 80),
-                    ],
+                        Expanded(child: Container()),
+                        GeneralButton('SAVE', kNormalColor, () {
+                          if (_onSaved() && isEditName)
+                            _editName();
+                          else if (_onSaved() && !isEditName) _editPassword();
+                        }),
+                        SizedBox(height: 80),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          OverlayMenu(() {
-            setState(() {
-              menuOpened = !menuOpened;
-            });
-          }, menuOpened)
-        ],
+            OverlayMenu(() {
+              setState(() {
+                menuOpened = !menuOpened;
+              });
+            }, menuOpened)
+          ],
+        ),
       ),
     );
   }

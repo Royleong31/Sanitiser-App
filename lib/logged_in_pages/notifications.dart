@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:sanitiser_app/models/const.dart';
 import 'package:sanitiser_app/provider/userProvider.dart';
 import 'package:sanitiser_app/widgets/CircleThumbShape.dart';
-import 'package:sanitiser_app/widgets/CustomInputField.dart';
 import 'package:sanitiser_app/widgets/GeneralButton.dart';
 import 'package:sanitiser_app/widgets/OverlayMenu.dart';
 
@@ -46,6 +45,33 @@ class _NotificationsState extends State<Notifications> {
         style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400),
       ),
     );
+  }
+
+  void saveHandler() async {
+    try {
+      await userProviderInfo.changeNotificationSettings(
+          notificationLevel, notifyWhenRefilled);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.lightGreen,
+          content: Text(
+            'Successsfully updated notification settings',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    } catch (err) {
+      print(err.message);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Theme.of(context).errorColor,
+          content: Text(
+            err.message,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -119,11 +145,11 @@ class _NotificationsState extends State<Notifications> {
                                 thumbColor: Colors.white),
                             child: Slider(
                               value: notificationLevel.toDouble(),
-                              min: 1,
-                              max: 99,
+                              min: 5,
+                              max: 50,
                               onChanged: (double newVal) {
                                 setState(() {
-                                  notificationLevel = newVal.round();
+                                  notificationLevel = (newVal / 5).round() * 5;
                                 });
                               },
                             ),
@@ -173,15 +199,7 @@ class _NotificationsState extends State<Notifications> {
                           ],
                         )),
                     Expanded(child: Container()),
-                    GeneralButton('SAVE', kNormalColor, () {
-                      print('Notification Level: $notificationLevel');
-                      print('Notify when refilled: $notifyWhenRefilled');
-                      userProviderInfo.setNotificationLevel = notificationLevel;
-
-                      userProviderInfo.setNotifyWhenRefilled =
-                          notifyWhenRefilled;
-                    }),
-   
+                    GeneralButton('SAVE', kNormalColor, saveHandler),
                     SizedBox(height: 80),
                   ],
                 ),

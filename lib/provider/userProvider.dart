@@ -38,39 +38,37 @@ class UserProvider with ChangeNotifier {
   int get notificationLevel => _notificationLevel;
   bool get notifyWhenRefilled => _notifyWhenRefilled;
 
-  set setName(String newName) {
-    _name = newName;
-  }
-
   set setEmail(String newEmail) {
     _email = newEmail;
   }
 
-  set setNotificationLevel(int newLevel) {
+  // set setNotificationLevel(int newLevel) {
+  //   _notificationLevel = newLevel;
+  // }
+
+  // set setNotifyWhenRefilled(bool newNotify) {
+  //   _notifyWhenRefilled = newNotify;
+  // }
+
+  Future<void> changeNotificationSettings(int newLevel, bool newNotify) async {
     _notificationLevel = newLevel;
-  }
-
-  set setNotifyWhenRefilled(bool newNotify) {
     _notifyWhenRefilled = newNotify;
+
+    final firebaseDocData =
+        FirebaseFirestore.instance.collection('users').doc(userDocId);
+
+    await firebaseDocData.update(
+        {'notificationLevel': newLevel, 'notifyWhenRefilled': newNotify});
+    print('updating notification settings in firebase');
   }
 
-  Future<bool> setFirebaseName(BuildContext context, String name) async {
-    try {
-      final firebaseDocData =
-          FirebaseFirestore.instance.collection('users').doc(userDocId);
+  Future<void> setName(BuildContext context, String name) async {
+    final firebaseDocData =
+        FirebaseFirestore.instance.collection('users').doc(userDocId);
 
-      _name = name;
-
-      print(firebaseDocData);
-
-      print("New name: $name");
-
-      await firebaseDocData.update({'name': name});
-
-      return true;
-    } catch (err) {
-      print(err);
-      return false;
-    }
+    _name = name;
+    print(firebaseDocData);
+    print("New name: $name");
+    await firebaseDocData.update({'name': name});
   }
 }

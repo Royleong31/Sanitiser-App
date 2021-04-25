@@ -43,7 +43,6 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  //SIGN IN METHOD
   Future<String> signIn(String email, String password, context) async {
     print('Trying to sign in');
     print('Email: $email, password: $password');
@@ -58,7 +57,6 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  //SIGN OUT METHOD
   Future<void> signOut(BuildContext context) async {
     final deviceToken =
         Provider.of<UserProvider>(context, listen: false).deviceToken;
@@ -84,32 +82,20 @@ class AuthProvider with ChangeNotifier {
         '/', ModalRoute.withName(WelcomeScreen.routeName));
   }
 
-  Future<bool> changePassword(String oldPassword, String newpassword) async {
+  Future<void> changePassword(String oldPassword, String newpassword) async {
     //Create an instance of the current user.
     User user = firebaseAuth.currentUser;
 
     //Pass in the password to updatePassword.
-    try {
-      final authResult = await user.reauthenticateWithCredential(
-        EmailAuthProvider.credential(
-          email: user.email,
-          password: oldPassword,
-        ),
-      );
-      print('Auth Result: $authResult');
+    final authResult = await user.reauthenticateWithCredential(
+      EmailAuthProvider.credential(
+        email: user.email,
+        password: oldPassword,
+      ),
+    );
 
-      await user.updatePassword(newpassword);
-      return true;
-    } catch (err) {
-      print("Password can't be changed" + err.toString());
-      return false;
-    }
-    // user.updatePassword(newpassword).then((_) {
-    //   print("Successfully changed password");
-    //   return true;
-    // }).catchError((error) {
-    //   print("Password can't be changed" + error.toString());
-    //   //This might happen, when the wrong password is in, the user isn't found, or if the user hasn't logged in recently.
-    // });
+    print('Auth Result: $authResult');
+    await user.updatePassword(newpassword);
+    // May throw an error which is then caught in the editProfile page
   }
 }
