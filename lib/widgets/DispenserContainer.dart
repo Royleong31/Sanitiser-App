@@ -114,7 +114,7 @@ class DispenserContainer extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 GeneralButton('RESET COUNT', kLightGreyColor, () {
-                  openResetDialog(context, '12345678', dispenserId);
+                  openResetDialog(context, dispenserId);
                 }),
                 GeneralButton('MORE INFO', klightGreenColor, () {
                   openInfoDialog(context, dispenserId, location);

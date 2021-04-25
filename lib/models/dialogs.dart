@@ -1,13 +1,19 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sanitiser_app/models/const.dart';
+import 'package:sanitiser_app/models/firebaseDispenser.dart';
+import 'package:sanitiser_app/provider/userProvider.dart';
 import 'package:sanitiser_app/widgets/CustomInputField.dart';
 import 'package:sanitiser_app/widgets/GeneralButton.dart';
 import 'package:sanitiser_app/widgets/InfoDialog.dart';
 import 'package:http/http.dart' as http;
 
-void openResetDialog(BuildContext context, String userId, String dispenserId) {
+void openResetDialog(BuildContext context, String dispenserId) {
+  final String userId =
+      Provider.of<UserProvider>(context, listen: false).userId;
+
   showGeneralDialog(
     barrierColor: Colors.transparent,
     transitionBuilder: (context, a1, a2, widget) {
@@ -176,7 +182,7 @@ void openEditDialog(BuildContext context, String location, String dispenserId) {
                           width: double.infinity,
                           height: 60,
                           child: TextFormField(
-                            initialValue: location.toUpperCase(),
+                            initialValue: location,
                             cursorColor: Colors.black,
                             onSaved: (val) => location = val.trim(),
                             validator: (val) {
@@ -218,11 +224,38 @@ void openEditDialog(BuildContext context, String location, String dispenserId) {
                         GeneralButton('CLOSE', Color(0xFFE5E5E5),
                             () => Navigator.of(context).pop()),
                         GeneralButton(
-                          'RESET',
+                          'CONFIRM',
                           Theme.of(context).accentColor,
-                          () {
+                          () async {
                             if (_onSaved()) {
-                              Navigator.of(context).pop();
+                              try {
+                                await kEditDispenserLocation(
+                                    location.toUpperCase(), dispenserId);
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    backgroundColor: Colors.lightGreen,
+                                    content: Text(
+                                      'Successsfully edited device',
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                );
+                              } catch (err) {
+                                print(err.message);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    backgroundColor:
+                                        Theme.of(context).errorColor,
+                                    content: Text(
+                                      err.message,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                );
+                              } finally {
+                                Navigator.of(context).pop();
+                              }
                             }
                           },
                           isAsync: true,
@@ -328,7 +361,8 @@ void addDeviceDialog(BuildContext context, Function qrHandler) {
   );
 }
 
-void openDeleteDialog(BuildContext context, String dispenserId) {
+void openDeleteDialog(
+    BuildContext context, String dispenserId, String location) {
   showGeneralDialog(
     barrierColor: Colors.transparent,
     transitionBuilder: (context, a1, a2, widget) {
@@ -355,7 +389,7 @@ void openDeleteDialog(BuildContext context, String dispenserId) {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'Are you sure you want to delete GARDEN dispenser?',
+                        'Are you sure you want to delete $location  dispenser?',
                         style: TextStyle(
                           fontSize: 18,
                           color: Color(0xFF9B9B9B),
@@ -372,8 +406,33 @@ void openDeleteDialog(BuildContext context, String dispenserId) {
                         GeneralButton(
                           'DELETE',
                           Colors.red,
-                          () {
-                            print('dispenser Id: $dispenserId');
+                          () async {
+                            try {
+                              await kDeleteDispenser(dispenserId, context);
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Colors.lightGreen,
+                                  content: Text(
+                                    'Successsfully deleted device',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              );
+                            } catch (err) {
+                              print(err.message);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Theme.of(context).errorColor,
+                                  content: Text(
+                                    err.message,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              );
+                            } finally {
+                              Navigator.of(context).pop();
+                            }
                           },
                           isAsync: true,
                         ),

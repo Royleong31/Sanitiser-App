@@ -9,7 +9,7 @@ class UsageRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: refilled == true ? kNormalColor : Colors.white,
+      color: refilled == true ? kNormalColor : kOffWhiteColor,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[TableCell(usage), TableCell(date), TableCell(time)],

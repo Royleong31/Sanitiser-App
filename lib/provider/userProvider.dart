@@ -28,6 +28,8 @@ class UserProvider with ChangeNotifier {
     this._userDocId = userDocId;
     this._notificationLevel = notificationLevel;
     this._notifyWhenRefilled = notifyWhenRefilled;
+
+    print('Dispenser List: $_dispensers');
   }
 
   String get deviceToken => _thisDeviceToken;
@@ -65,17 +67,23 @@ class UserProvider with ChangeNotifier {
     await firebaseDocData.update({'name': name});
   }
 
-  Future<List<Map<String, dynamic>>> getDispenserDetails() async {
-    List<Map<String, dynamic>> dispenserDetails = [];
-    final result = await FirebaseFirestore.instance
-        .collection('dispensers')
-        .where('userId', isEqualTo: _userId)
-        .get();
+  Future<void> addNewDispenser(String dispenserId) async {
+    _dispensers.add(dispenserId);
+    final firebaseDocData =
+        FirebaseFirestore.instance.collection('users').doc(userDocId);
 
-    print('User ID: $_userId');
+    await firebaseDocData.update({'dispensers': _dispensers});
 
-    dispenserDetails = result.docs.map((doc) => doc.data()).toList();
-    print('Dispenser Details: $dispenserDetails');
-    return dispenserDetails;
+    print('Dispenser List: $_dispensers');
+  }
+
+  Future<void> deleteDispenser(String dispenserId) async {
+    _dispensers.remove(dispenserId);
+    final firebaseDocData =
+        FirebaseFirestore.instance.collection('users').doc(userDocId);
+
+    await firebaseDocData.update({'dispensers': _dispensers});
+
+    print('Dispenser List: $_dispensers');
   }
 }

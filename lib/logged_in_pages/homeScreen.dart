@@ -105,7 +105,10 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     return StreamBuilder(
-      stream: FirebaseFirestore.instance.collection('dispensers').snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('dispensers')
+          .where('userId', isEqualTo: userId)
+          .snapshots(),
       builder: (ctx, dispenserSnapshot) {
         if (dispenserSnapshot.connectionState == ConnectionState.waiting)
           return SplashScreen();

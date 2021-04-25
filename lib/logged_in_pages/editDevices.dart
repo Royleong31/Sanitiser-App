@@ -6,6 +6,7 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitiser_app/models/const.dart';
 import 'package:sanitiser_app/models/dialogs.dart';
+import 'package:sanitiser_app/models/firebaseDispenser.dart';
 import 'package:sanitiser_app/provider/userProvider.dart';
 import 'package:sanitiser_app/widgets/CustomInputField.dart';
 import 'package:sanitiser_app/widgets/GeneralButton.dart';
@@ -39,15 +40,17 @@ class _EditDevicesState extends State<EditDevices> {
         final List<QueryDocumentSnapshot> dispenserData =
             dispenserSnapshot.data.docs;
 
-        return EditDevicesWidget(dispenserData);
+        return EditDevicesWidget(dispenserData, _userId);
       },
     );
   }
 }
 
 class EditDevicesWidget extends StatefulWidget {
-  EditDevicesWidget(this.dispenserData);
+  EditDevicesWidget(this.dispenserData, this.userId);
   final List<QueryDocumentSnapshot> dispenserData;
+  final String userId;
+
   @override
   _EditDevicesWidgetState createState() => _EditDevicesWidgetState();
 }
@@ -55,7 +58,7 @@ class EditDevicesWidget extends StatefulWidget {
 class _EditDevicesWidgetState extends State<EditDevicesWidget> {
   final dispenserIdController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  String deviceLocation, deviceId;
+  String deviceLocation, dispenserId;
   bool menuOpened = false;
 
   bool _onSaved() {
@@ -63,7 +66,7 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
     if (!isValid) return false;
     _formKey.currentState.save();
     print('Device Location: $deviceLocation');
-    print('Dispenser ID: $deviceId');
+    print('Dispenser ID: $dispenserId');
 
     return true;
   }
@@ -71,7 +74,7 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
   void addDeviceDialog() {
     showGeneralDialog(
       barrierColor: Colors.transparent,
-      transitionBuilder: (context, a1, a2, widget) {
+      transitionBuilder: (context, a1, a2, _) {
         dispenserIdController.clear();
         return Transform.scale(
           scale: a1.value,
@@ -90,10 +93,7 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        Text(
-                          'ADD NEW DEVICE',
-                          style: TextStyle(fontSize: 24),
-                        ),
+                        Text('ADD NEW DEVICE', style: TextStyle(fontSize: 24)),
                         SizedBox(height: 20),
                         CustomInputField(
                           label: 'LOCATION',
@@ -105,7 +105,7 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
                             CustomInputField(
                               label: 'DISPENSER ID',
                               controller: dispenserIdController,
-                              saveHandler: (val) => deviceId = val.trim(),
+                              saveHandler: (val) => dispenserId = val.trim(),
                             ),
                             Positioned(
                               right: 8,
@@ -114,7 +114,7 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
                                 onTap: () async {
                                   print('opening qr code scanner');
                                   await scanQRCode();
-                                  print('QR code result is: $deviceId');
+                                  print('QR code result is: $dispenserId');
                                 },
                                 child: Icon(
                                   Icons.qr_code_scanner_sharp,
@@ -134,8 +134,40 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
                             GeneralButton(
                               'ADD',
                               klightGreenColor,
-                              () {
-                                _onSaved();
+                              () async {
+                                if (_onSaved()) {
+                                  try {
+                                    await kAddNewDispenser(
+                                        deviceLocation.toUpperCase(),
+                                        dispenserId,
+                                        widget.userId,
+                                        context);
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        backgroundColor: Colors.lightGreen,
+                                        content: Text(
+                                          'Successsfully added a new device',
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    );
+                                  } catch (err) {
+                                    print(err.message);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        backgroundColor:
+                                            Theme.of(context).errorColor,
+                                        content: Text(
+                                          err.message,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    );
+                                  } finally {
+                                    Navigator.of(context).pop();
+                                  }
+                                }
                               },
                               isAsync: true,
                             ),
@@ -162,18 +194,18 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
 
   Future<void> scanQRCode() async {
     try {
-      deviceId = await FlutterBarcodeScanner.scanBarcode(
+      dispenserId = await FlutterBarcodeScanner.scanBarcode(
         '#49DAE3',
         'Cancel',
         true,
         ScanMode.QR,
       );
-      if (deviceId == '-1' || !mounted) return;
+      if (dispenserId == '-1' || !mounted) return;
 
       print('-----------------------------');
-      print(deviceId);
-      print('Device ID: $deviceId');
-      dispenserIdController.text = deviceId;
+      print(dispenserId);
+      print('Device ID: $dispenserId');
+      dispenserIdController.text = dispenserId;
     } catch (err) {
       print('there was an error: $err');
     }
@@ -259,8 +291,6 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
                             return DeviceListTile(
                               location: currentDoc['location'],
                               dispenserId: currentDoc['dispenserId'],
-                              onEdit: () {},
-                              onDelete: () {},
                             );
                           },
                         ),
@@ -310,9 +340,8 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
 }
 
 class DeviceListTile extends StatelessWidget {
-  DeviceListTile({this.location, this.dispenserId, this.onEdit, this.onDelete});
+  DeviceListTile({this.location, this.dispenserId});
   final String location, dispenserId;
-  final Function onEdit, onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -342,7 +371,7 @@ class DeviceListTile extends StatelessWidget {
           SizedBox(height: 5),
           Row(
             children: [
-              Text(location.toUpperCase(), style: TextStyle(fontSize: 18)),
+              Text(location, style: TextStyle(fontSize: 18)),
               Spacer(),
               Container(
                 child: Row(
@@ -357,8 +386,8 @@ class DeviceListTile extends StatelessWidget {
                           FontAwesomeIcons.solidTrashAlt,
                           size: 24,
                         ),
-                        onTap: () => openDeleteDialog(context,
-                            dispenserId)), // need dispenser ID to delete the device
+                        onTap: () => openDeleteDialog(context, dispenserId,
+                            location)), // need dispenser ID to delete the device
                   ],
                 ),
               )
