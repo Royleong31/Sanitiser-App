@@ -40,21 +40,22 @@ class _HomeScreenState extends State<HomeScreen> {
       print('Got a message whilst in the foreground!');
       print('Message data: ${message.data}');
       showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-                title: Text("${message.notification.title}!"),
-                content: message.notification.body.isEmpty
-                    ? null
-                    : Text("${message.notification.body}"),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text('Close'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  )
-                ],
-              ));
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text("${message.notification.title}!"),
+          content: message.notification.body.isEmpty
+              ? null
+              : Text("${message.notification.body}"),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        ),
+      );
 
       if (message.notification != null) {
         print(

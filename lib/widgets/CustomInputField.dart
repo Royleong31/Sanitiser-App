@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 
 // ignore: must_be_immutable
 class CustomInputField extends StatelessWidget {
-  final String label;
+  final String label, initialValue;
   final Function saveHandler;
-  final bool obscureText;
+  final bool obscureText, padRight;
   final TextInputType keyboardType;
   final TextEditingController controller;
-  final String initialValue;
   Function validatorHandler;
 
   CustomInputField({
@@ -18,6 +17,7 @@ class CustomInputField extends StatelessWidget {
     this.validatorHandler,
     this.controller,
     this.initialValue,
+    this.padRight: false,
   }) {
     if (validatorHandler == null) {
       validatorHandler = (String val) {
@@ -55,7 +55,9 @@ class CustomInputField extends StatelessWidget {
               helperText: ' ',
               filled: true,
               fillColor: Colors.transparent,
-              contentPadding: EdgeInsets.only(left: 10),
+              contentPadding: padRight
+                  ? EdgeInsets.only(left: 10, right: 45)
+                  : EdgeInsets.only(left: 10, right: 10),
               border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(5),
                   borderSide: BorderSide(color: Colors.black)),

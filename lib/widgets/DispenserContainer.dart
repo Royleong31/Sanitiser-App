@@ -66,9 +66,6 @@ class DispenserContainer extends StatelessWidget {
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 5),
                   decoration: BoxDecoration(
-                    // color: Theme.of(context).accentColor,
-                    // color: normalColor,
-                    // color: kLowColor,
                     color: kLightGreyColor,
                     borderRadius: BorderRadius.circular(5),
                   ),
@@ -113,9 +110,24 @@ class DispenserContainer extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                GeneralButton('RESET COUNT', kLightGreyColor, () {
-                  openResetDialog(context, dispenserId);
-                }),
+                GeneralButton(
+                    'RESET COUNT',
+                    kLightGreyColor,
+                    level == 100
+                        ? () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                backgroundColor: Color(0xFFEDB95E),
+                                content: Text(
+                                  'Refill is already full',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            );
+                          }
+                        : () {
+                            openResetDialog(context, dispenserId);
+                          }),
                 GeneralButton('MORE INFO', klightGreenColor, () {
                   openInfoDialog(context, dispenserId, location);
                 })

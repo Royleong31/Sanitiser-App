@@ -105,6 +105,7 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
                             CustomInputField(
                               label: 'DISPENSER ID',
                               controller: dispenserIdController,
+                              padRight: true,
                               saveHandler: (val) => dispenserId = val.trim(),
                             ),
                             Positioned(

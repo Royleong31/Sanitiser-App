@@ -70,6 +70,7 @@ void openResetDialog(BuildContext context, String dispenserId) {
                                     textAlign: TextAlign.center),
                                 backgroundColor: Colors.lightGreen,
                               ));
+                              Navigator.of(context).pop();
                             } catch (e) {
                               print(e);
                               ScaffoldMessenger.of(context)
