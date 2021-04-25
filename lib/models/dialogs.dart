@@ -121,7 +121,17 @@ void openInfoDialog(BuildContext context, String dispenserId, String location) {
   );
 }
 
-void openEditDialog(BuildContext context) {
+void openEditDialog(BuildContext context, String location, String dispenserId) {
+  final _formKey = GlobalKey<FormState>();
+
+  bool _onSaved() {
+    final isValid = _formKey.currentState.validate();
+    if (!isValid) return false;
+    _formKey.currentState.save();
+    print('Location: $location');
+    return true;
+  }
+
   showGeneralDialog(
     barrierColor: Colors.transparent,
     transitionBuilder: (context, a1, a2, widget) {
@@ -153,45 +163,54 @@ void openEditDialog(BuildContext context) {
                             TextStyle(color: Color(0xFF9B9B9B), fontSize: 14),
                         textAlign: TextAlign.center),
                     SizedBox(height: 6),
-                    Text('23rfwsfsfd', style: TextStyle(fontSize: 18)),
+                    Text(dispenserId, style: TextStyle(fontSize: 18)),
                     SizedBox(height: 20),
                     Text('Location',
                         style:
                             TextStyle(color: Color(0xFF9B9B9B), fontSize: 14),
                         textAlign: TextAlign.center),
                     SizedBox(height: 6),
-                    Container(
-                        width: double.infinity,
-                        height: 60,
-                        child: TextFormField(
-                          initialValue: 'Garden'.toUpperCase(),
-                          cursorColor: Colors.black,
-                          decoration: InputDecoration(
-                            helperText: ' ',
-                            filled: true,
-                            fillColor: Colors.transparent,
-                            contentPadding: EdgeInsets.only(left: 10),
-                            border: OutlineInputBorder(
+                    Form(
+                      key: _formKey,
+                      child: Container(
+                          width: double.infinity,
+                          height: 60,
+                          child: TextFormField(
+                            initialValue: location.toUpperCase(),
+                            cursorColor: Colors.black,
+                            onSaved: (val) => location = val.trim(),
+                            validator: (val) {
+                              if (val.length == 0)
+                                return 'Location name cannot be empty';
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              helperText: ' ',
+                              filled: true,
+                              fillColor: Colors.transparent,
+                              contentPadding: EdgeInsets.only(left: 10),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                  borderSide: BorderSide(color: Colors.black)),
+                              focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                  borderSide: BorderSide(
+                                      color: Colors.black, width: 2)),
+                              enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
-                                borderSide: BorderSide(color: Colors.black)),
-                            focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.black),
+                              ),
+                              errorBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
-                                borderSide:
-                                    BorderSide(color: Colors.black, width: 2)),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5),
-                              borderSide: BorderSide(color: Colors.black),
+                                borderSide: BorderSide(
+                                    color: Theme.of(context).errorColor,
+                                    width: 1),
+                              ),
+                              hintStyle: TextStyle(
+                                  fontSize: 1.0, color: Colors.black38),
                             ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5),
-                              borderSide: BorderSide(
-                                  color: Theme.of(context).errorColor,
-                                  width: 1),
-                            ),
-                            hintStyle:
-                                TextStyle(fontSize: 1.0, color: Colors.black38),
-                          ),
-                        )),
+                          )),
+                    ),
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -201,7 +220,11 @@ void openEditDialog(BuildContext context) {
                         GeneralButton(
                           'RESET',
                           Theme.of(context).accentColor,
-                          () {},
+                          () {
+                            if (_onSaved()) {
+                              Navigator.of(context).pop();
+                            }
+                          },
                           isAsync: true,
                         ),
                       ],
@@ -224,7 +247,7 @@ void openEditDialog(BuildContext context) {
   );
 }
 
-void addDeviceDialog(BuildContext context) {
+void addDeviceDialog(BuildContext context, Function qrHandler) {
   showGeneralDialog(
     barrierColor: Colors.transparent,
     transitionBuilder: (context, a1, a2, widget) {
@@ -250,40 +273,25 @@ void addDeviceDialog(BuildContext context) {
                     SizedBox(height: 20),
                     CustomInputField(label: 'LOCATION'),
                     Stack(
-                      alignment: Alignment.centerRight,
+                      // alignment: Alignment.centerRight,
                       children: [
                         CustomInputField(
                           label: 'DISPENSER ID',
-                          // suffixIcon: GestureDetector(
-                          //   onTap: () {
-                          //     FocusScopeNode currentFocus = FocusScope.of(context);
-                          //     currentFocus.unfocus();
-                          //     // if (!currentFocus.hasPrimaryFocus) {
-                          //     //   currentFocus.unfocus();
-                          //     // }
-                          //     print('opening qr code scanner');
-                          //   },
-                          //   child: Icon(
-                          //     Icons.qr_code_scanner_sharp,
-                          //     color: Colors.black,
-                          //     size: 30,
-                          //   ),
-                          // ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            FocusScopeNode currentFocus =
-                                FocusScope.of(context);
-                            currentFocus.unfocus();
-                            // if (!currentFocus.hasPrimaryFocus) {
-                            //   currentFocus.unfocus();
-                            // }
-                            print('opening qr code scanner');
-                          },
-                          child: Icon(
-                            Icons.qr_code_scanner_sharp,
-                            color: Colors.black,
-                            size: 30,
+                        Positioned(
+                          right: 8,
+                          bottom: 36,
+                          child: GestureDetector(
+                            onTap: () async {
+                              print('opening qr code scanner');
+                              final result = await qrHandler();
+                              print('QR code result is: $result');
+                            },
+                            child: Icon(
+                              Icons.qr_code_scanner_sharp,
+                              color: Colors.black,
+                              size: 30,
+                            ),
                           ),
                         ),
                       ],
@@ -320,7 +328,7 @@ void addDeviceDialog(BuildContext context) {
   );
 }
 
-void openDeleteDialog(BuildContext context) {
+void openDeleteDialog(BuildContext context, String dispenserId) {
   showGeneralDialog(
     barrierColor: Colors.transparent,
     transitionBuilder: (context, a1, a2, widget) {
@@ -364,7 +372,9 @@ void openDeleteDialog(BuildContext context) {
                         GeneralButton(
                           'DELETE',
                           Colors.red,
-                          () {},
+                          () {
+                            print('dispenser Id: $dispenserId');
+                          },
                           isAsync: true,
                         ),
                       ],

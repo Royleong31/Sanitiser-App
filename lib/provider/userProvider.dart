@@ -37,18 +37,11 @@ class UserProvider with ChangeNotifier {
   String get email => _email;
   int get notificationLevel => _notificationLevel;
   bool get notifyWhenRefilled => _notifyWhenRefilled;
+  List<String> get dispensers => _dispensers;
 
   set setEmail(String newEmail) {
     _email = newEmail;
   }
-
-  // set setNotificationLevel(int newLevel) {
-  //   _notificationLevel = newLevel;
-  // }
-
-  // set setNotifyWhenRefilled(bool newNotify) {
-  //   _notifyWhenRefilled = newNotify;
-  // }
 
   Future<void> changeNotificationSettings(int newLevel, bool newNotify) async {
     _notificationLevel = newLevel;
@@ -70,5 +63,19 @@ class UserProvider with ChangeNotifier {
     print(firebaseDocData);
     print("New name: $name");
     await firebaseDocData.update({'name': name});
+  }
+
+  Future<List<Map<String, dynamic>>> getDispenserDetails() async {
+    List<Map<String, dynamic>> dispenserDetails = [];
+    final result = await FirebaseFirestore.instance
+        .collection('dispensers')
+        .where('userId', isEqualTo: _userId)
+        .get();
+
+    print('User ID: $_userId');
+
+    dispenserDetails = result.docs.map((doc) => doc.data()).toList();
+    print('Dispenser Details: $dispenserDetails');
+    return dispenserDetails;
   }
 }

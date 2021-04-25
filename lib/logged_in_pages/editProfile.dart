@@ -23,10 +23,7 @@ class _EditProfileState extends State<EditProfile>
   bool isEditName = true;
   bool showSpinner = false;
   bool showPasswordInfo = false;
-  List<String> changeMenuText = [
-    'RESET PASSWORD INSTEAD',
-    'CHANGE NAME INSTEAD'
-  ];
+  List<String> changeMenuText = ['RESET PASSWORD', 'CHANGE NAME'];
   String _name, _newPassword, _oldPassword;
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -275,32 +272,36 @@ class _EditProfileState extends State<EditProfile>
                             ],
                           ),
                         ),
-                        TextButton(
-                          onPressed: () {
-                            _clearPasswordControllers();
-                            if (isEditName) {
-                              setState(() {
-                                isEditName = false;
-                                Timer(Duration(milliseconds: 150), () {
-                                  setState(() {
-                                    showPasswordInfo = true;
-                                    _controller.forward();
+                        Container(
+                          width: 120,
+                          child: TextButton(
+                            onPressed: () {
+                              _clearPasswordControllers();
+                              if (isEditName) {
+                                setState(() {
+                                  isEditName = false;
+                                  Timer(Duration(milliseconds: 150), () {
+                                    setState(() {
+                                      showPasswordInfo = true;
+                                      _controller.forward();
+                                    });
                                   });
                                 });
-                              });
-                            } else {
-                              setState(() {
-                                isEditName = true;
-                                showPasswordInfo = false;
-                                _controller.reverse();
-                              });
-                            }
-                          },
-                          style: TextButton.styleFrom(
-                              backgroundColor: kOffWhiteColor),
-                          child: Text(
-                            changeMenuText[isEditName ? 0 : 1],
-                            style: TextStyle(color: Colors.black, fontSize: 12),
+                              } else {
+                                setState(() {
+                                  isEditName = true;
+                                  showPasswordInfo = false;
+                                  _controller.reverse();
+                                });
+                              }
+                            },
+                            style: TextButton.styleFrom(
+                                backgroundColor: kOffWhiteColor),
+                            child: Text(
+                              changeMenuText[isEditName ? 0 : 1],
+                              style:
+                                  TextStyle(color: Colors.black, fontSize: 12),
+                            ),
                           ),
                         ),
                         Expanded(child: Container()),

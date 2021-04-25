@@ -1,10 +1,18 @@
+import 'dart:ui';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:provider/provider.dart';
 import 'package:sanitiser_app/models/const.dart';
 import 'package:sanitiser_app/models/dialogs.dart';
+import 'package:sanitiser_app/provider/userProvider.dart';
 import 'package:sanitiser_app/widgets/CustomInputField.dart';
 import 'package:sanitiser_app/widgets/GeneralButton.dart';
 import 'package:sanitiser_app/widgets/OverlayMenu.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+import '../splash_screen.dart';
 
 class EditDevices extends StatefulWidget {
   static const routeName = 'edit-devices';
@@ -14,7 +22,162 @@ class EditDevices extends StatefulWidget {
 }
 
 class _EditDevicesState extends State<EditDevices> {
+  @override
+  Widget build(BuildContext context) {
+    final String _userId =
+        Provider.of<UserProvider>(context, listen: false).userId;
+
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance
+          .collection('dispensers')
+          .where('userId', isEqualTo: _userId)
+          .snapshots(),
+      builder: (ctx, dispenserSnapshot) {
+        if (dispenserSnapshot.connectionState == ConnectionState.waiting)
+          return SplashScreen();
+
+        final List<QueryDocumentSnapshot> dispenserData =
+            dispenserSnapshot.data.docs;
+
+        return EditDevicesWidget(dispenserData);
+      },
+    );
+  }
+}
+
+class EditDevicesWidget extends StatefulWidget {
+  EditDevicesWidget(this.dispenserData);
+  final List<QueryDocumentSnapshot> dispenserData;
+  @override
+  _EditDevicesWidgetState createState() => _EditDevicesWidgetState();
+}
+
+class _EditDevicesWidgetState extends State<EditDevicesWidget> {
+  final dispenserIdController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  String deviceLocation, deviceId;
   bool menuOpened = false;
+
+  bool _onSaved() {
+    final isValid = _formKey.currentState.validate();
+    if (!isValid) return false;
+    _formKey.currentState.save();
+    print('Device Location: $deviceLocation');
+    print('Dispenser ID: $deviceId');
+
+    return true;
+  }
+
+  void addDeviceDialog() {
+    showGeneralDialog(
+      barrierColor: Colors.transparent,
+      transitionBuilder: (context, a1, a2, widget) {
+        dispenserIdController.clear();
+        return Transform.scale(
+          scale: a1.value,
+          child: Opacity(
+            opacity: a1.value,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+              child: Dialog(
+                backgroundColor: Colors.white,
+                insetPadding: EdgeInsets.symmetric(horizontal: 0),
+                child: Container(
+                  height: 330,
+                  width: 320,
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        Text(
+                          'ADD NEW DEVICE',
+                          style: TextStyle(fontSize: 24),
+                        ),
+                        SizedBox(height: 20),
+                        CustomInputField(
+                          label: 'LOCATION',
+                          saveHandler: (val) => deviceLocation = val.trim(),
+                        ),
+                        Stack(
+                          // alignment: Alignment.centerRight,
+                          children: [
+                            CustomInputField(
+                              label: 'DISPENSER ID',
+                              controller: dispenserIdController,
+                              saveHandler: (val) => deviceId = val.trim(),
+                            ),
+                            Positioned(
+                              right: 8,
+                              bottom: 36,
+                              child: GestureDetector(
+                                onTap: () async {
+                                  print('opening qr code scanner');
+                                  await scanQRCode();
+                                  print('QR code result is: $deviceId');
+                                },
+                                child: Icon(
+                                  Icons.qr_code_scanner_sharp,
+                                  color: Colors.black,
+                                  size: 30,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 30),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            GeneralButton('CLOSE', Color(0xFFE5E5E5),
+                                () => Navigator.of(context).pop()),
+                            GeneralButton(
+                              'ADD',
+                              klightGreenColor,
+                              () {
+                                _onSaved();
+                              },
+                              isAsync: true,
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      transitionDuration: Duration(milliseconds: 200),
+      barrierDismissible: true,
+      barrierLabel: '',
+      context: context,
+      pageBuilder: (context, animation1, animation2) {
+        return;
+      },
+    );
+  }
+
+  Future<void> scanQRCode() async {
+    try {
+      deviceId = await FlutterBarcodeScanner.scanBarcode(
+        '#49DAE3',
+        'Cancel',
+        true,
+        ScanMode.QR,
+      );
+      if (deviceId == '-1' || !mounted) return;
+
+      print('-----------------------------');
+      print(deviceId);
+      print('Device ID: $deviceId');
+      dispenserIdController.text = deviceId;
+    } catch (err) {
+      print('there was an error: $err');
+    }
+  }
 
   get appBar {
     return AppBar(
@@ -88,18 +251,24 @@ class _EditDevicesState extends State<EditDevices> {
                             MediaQuery.of(context).padding.top -
                             250,
                         width: 280,
-                        child: ListView(
-                          children: [
-                            DeviceListTile('Garden', () {}, () {}),
-                            DeviceListTile('Garden', () {}, () {}),
-                            DeviceListTile('Garden', () {}, () {}),
-                          ],
+                        child: ListView.builder(
+                          itemCount: widget.dispenserData.length,
+                          itemBuilder: (ctx, i) {
+                            final Map<String, dynamic> currentDoc =
+                                widget.dispenserData[i].data();
+                            return DeviceListTile(
+                              location: currentDoc['location'],
+                              dispenserId: currentDoc['dispenserId'],
+                              onEdit: () {},
+                              onDelete: () {},
+                            );
+                          },
                         ),
                       ),
                       GestureDetector(
                         onTap: () {
                           print('adding new device');
-                          addDeviceDialog(context);
+                          addDeviceDialog();
                         },
                         child: Container(
                           height: 50,
@@ -141,8 +310,8 @@ class _EditDevicesState extends State<EditDevices> {
 }
 
 class DeviceListTile extends StatelessWidget {
-  DeviceListTile(this.location, this.onEdit, this.onDelete);
-  final String location;
+  DeviceListTile({this.location, this.dispenserId, this.onEdit, this.onDelete});
+  final String location, dispenserId;
   final Function onEdit, onDelete;
 
   @override
@@ -179,15 +348,17 @@ class DeviceListTile extends StatelessWidget {
                 child: Row(
                   children: [
                     GestureDetector(
-                        child: FaIcon(FontAwesomeIcons.solidEdit, size: 22),
-                        onTap: () => openEditDialog(context)),
+                        child: FaIcon(FontAwesomeIcons.solidEdit, size: 24),
+                        onTap: () => openEditDialog(context, location,
+                            dispenserId)), // insert dispenser ID and location to autofill into textfield
                     SizedBox(width: 20),
                     GestureDetector(
                         child: FaIcon(
                           FontAwesomeIcons.solidTrashAlt,
-                          size: 22,
+                          size: 24,
                         ),
-                        onTap: () => openDeleteDialog(context)),
+                        onTap: () => openDeleteDialog(context,
+                            dispenserId)), // need dispenser ID to delete the device
                   ],
                 ),
               )
