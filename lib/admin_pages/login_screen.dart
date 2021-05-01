@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sanitiser_app/models/const.dart';
+import 'package:sanitiser_app/models/dialogs.dart';
 import 'package:sanitiser_app/provider/authProvider.dart';
 import 'package:sanitiser_app/widgets/ColoredWelcomeButton.dart';
 import 'package:sanitiser_app/widgets/CustomInputField.dart';
@@ -116,7 +119,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       }, 'LOG IN'),
                       SizedBox(height: 10),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () => openForgotPasswordDialog(context),
+                        style: TextButton.styleFrom(
+                            backgroundColor: Colors.blueGrey.withOpacity(0.2)),
                         child: Text(
                           'FORGOT PASSWORD?',
                           style: TextStyle(color: Colors.black, fontSize: 12),

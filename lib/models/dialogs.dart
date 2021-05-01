@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitiser_app/models/const.dart';
@@ -77,7 +78,7 @@ void openResetDialog(BuildContext context, String dispenserId) {
                               print(e);
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(SnackBar(
-                                    duration: Duration(seconds: 2),
+                                duration: Duration(seconds: 2),
                                 content: Text(
                                     'There was an error in resetting counter',
                                     textAlign: TextAlign.center),
@@ -397,13 +398,35 @@ void openDeleteDialog(
                     SizedBox(height: 20),
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Are you sure you want to delete $location  dispenser?',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Color(0xFF9B9B9B),
+                      child: RichText(
+                        text: TextSpan(
+                          style: TextStyle(
+                            fontSize: 14.0,
+                            color: Colors.black,
+                          ),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: 'Are you sure you want to delete ',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Color(0xFF9B9B9B),
+                              ),
+                            ),
+                            TextSpan(
+                                text: location,
+                                style: new TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 18,
+                                )),
+                            TextSpan(
+                              text: ' dispenser?',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Color(0xFF9B9B9B),
+                              ),
+                            ),
+                          ],
                         ),
-                        textAlign: TextAlign.left,
                       ),
                     ),
                     SizedBox(height: 40),
@@ -452,6 +475,118 @@ void openDeleteDialog(
                       ],
                     )
                   ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+    transitionDuration: Duration(milliseconds: 200),
+    barrierDismissible: true,
+    barrierLabel: '',
+    context: context,
+    pageBuilder: (context, animation1, animation2) {
+      return;
+    },
+  );
+}
+
+void openForgotPasswordDialog(BuildContext context) {
+  String _email;
+  final _formKey = GlobalKey<FormState>();
+
+  bool _onSaved() {
+    final isValid = _formKey.currentState.validate();
+    if (!isValid) return false;
+    _formKey.currentState.save();
+    print('Email: $_email');
+    return true;
+  }
+
+  showGeneralDialog(
+    barrierColor: Colors.transparent,
+    transitionBuilder: (context, a1, a2, widget) {
+      return Transform.scale(
+        scale: a1.value,
+        child: Opacity(
+          opacity: a1.value,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+            child: Dialog(
+              backgroundColor: Colors.white,
+              insetPadding: EdgeInsets.symmetric(horizontal: 0),
+              child: Container(
+                height: 228,
+                width: 320,
+                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      Text(
+                        'FORGOT PASSWORD',
+                        style: TextStyle(fontSize: 24),
+                      ),
+                      SizedBox(height: 40),
+                      CustomInputField(
+                        label: 'EMAIL',
+                        saveHandler: (val) => _email = val.trim(),
+                        keyboardType: TextInputType.emailAddress,
+                        validatorHandler: (val) {
+                          if (!val.contains('@') || !val.contains('.com'))
+                            return 'Please enter a valid email address';
+                          return null;
+                        },
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GeneralButton('CLOSE', Color(0xFFE5E5E5),
+                              () => Navigator.of(context).pop()),
+                          GeneralButton(
+                            'ENTER',
+                            kNormalColor,
+                            () async {
+                              if (_onSaved()) {
+                                try {
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
+                                  await FirebaseAuth.instance
+                                      .sendPasswordResetEmail(email: _email);
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      backgroundColor: Colors.lightGreen,
+                                      content: Text(
+                                        'An email was sent to your email address to reset your password',
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  );
+                                } catch (err) {
+                                  print(err.message);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      backgroundColor:
+                                          Theme.of(context).errorColor,
+                                      content: Text(
+                                        err.message,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  );
+                                } finally {
+                                  Navigator.of(context).pop();
+                                }
+                              }
+                            },
+                            isAsync: true,
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
