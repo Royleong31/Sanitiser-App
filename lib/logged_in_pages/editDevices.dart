@@ -1,9 +1,11 @@
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:provider/provider.dart';
+import 'package:sanitiser_app/models/CustomException.dart';
 import 'package:sanitiser_app/models/const.dart';
 import 'package:sanitiser_app/models/dialogs.dart';
 import 'package:sanitiser_app/models/firebaseDispenser.dart';
@@ -59,7 +61,39 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
   final dispenserIdController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String deviceLocation, dispenserId;
+  List<String> locationList = [];
   bool menuOpened = false;
+
+  @override
+  void initState() {
+    super.initState();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Got a message whilst in the foreground!');
+      print('Message data: ${message.data}');
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text("${message.notification.title}!"),
+          content: message.notification.body.isEmpty
+              ? null
+              : Text("${message.notification.body}"),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        ),
+      );
+
+      if (message.notification != null) {
+        print(
+            'Message also contained a notification: title: ${message.notification.title} body: ${message.notification.body}');
+      }
+    });
+  }
 
   bool _onSaved() {
     final isValid = _formKey.currentState.validate();
@@ -138,12 +172,17 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
                               () async {
                                 if (_onSaved()) {
                                   try {
+                                    if (locationList
+                                        .contains(deviceLocation.toUpperCase()))
+                                      throw CustomException(
+                                          'Another device has the same name');
                                     await kAddNewDispenser(
                                         deviceLocation.toUpperCase(),
                                         dispenserId,
                                         widget.userId,
                                         context);
-
+                                    ScaffoldMessenger.of(context)
+                                        .hideCurrentSnackBar();
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         backgroundColor: Colors.lightGreen,
@@ -151,6 +190,7 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
                                           'Successsfully added a new device',
                                           textAlign: TextAlign.center,
                                         ),
+                                        duration: Duration(seconds: 2),
                                       ),
                                     );
                                   } catch (err) {
@@ -289,8 +329,11 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
                           itemBuilder: (ctx, i) {
                             final Map<String, dynamic> currentDoc =
                                 widget.dispenserData[i].data();
+                            final locationName = currentDoc['location'];
+                            locationList.add(locationName);
+                            print('Location List: $locationList');
                             return DeviceListTile(
-                              location: currentDoc['location'],
+                              location: locationName,
                               dispenserId: currentDoc['dispenserId'],
                             );
                           },
@@ -315,10 +358,8 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
                             children: [
                               FaIcon(FontAwesomeIcons.plus),
                               SizedBox(width: 20),
-                              Text(
-                                'Add New Device',
-                                style: TextStyle(fontSize: 18),
-                              ),
+                              Text('Add New Device',
+                                  style: TextStyle(fontSize: 18)),
                             ],
                           ),
                         ),

@@ -115,8 +115,10 @@ class DispenserContainer extends StatelessWidget {
                     kLightGreyColor,
                     level == 100
                         ? () {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
+                                duration: Duration(seconds: 2),
                                 backgroundColor: Color(0xFFEDB95E),
                                 content: Text(
                                   'Refill is already full',

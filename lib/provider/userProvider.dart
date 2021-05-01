@@ -7,6 +7,7 @@ class UserProvider with ChangeNotifier {
   List<String> _dispensers, _deviceTokens;
   int _notificationLevel;
   bool _notifyWhenRefilled;
+  bool menuOpened = false;
 
   void setValues({
     @required String name,
@@ -30,6 +31,11 @@ class UserProvider with ChangeNotifier {
     this._notifyWhenRefilled = notifyWhenRefilled;
 
     print('Dispenser List: $_dispensers');
+  }
+
+  void setMenuOpened() {
+    menuOpened = !menuOpened;
+    notifyListeners();
   }
 
   String get deviceToken => _thisDeviceToken;

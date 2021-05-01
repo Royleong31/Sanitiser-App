@@ -86,6 +86,7 @@ class Authenticate extends StatelessWidget {
 
     if (firebaseUser != null) {
       print('home is homescreen');
+      Provider.of<UserProvider>(context, listen: false).menuOpened = false;
       return HomeScreen();
     }
 

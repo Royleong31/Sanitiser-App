@@ -61,6 +61,7 @@ void openResetDialog(BuildContext context, String dispenserId) {
                             );
 
                             http.Response response;
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
                             try {
                               response = await http.patch(url);
@@ -69,12 +70,14 @@ void openResetDialog(BuildContext context, String dispenserId) {
                                 content: Text('Successfully reset counter!',
                                     textAlign: TextAlign.center),
                                 backgroundColor: Colors.lightGreen,
+                                duration: Duration(seconds: 2),
                               ));
                               Navigator.of(context).pop();
                             } catch (e) {
                               print(e);
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(SnackBar(
+                                    duration: Duration(seconds: 2),
                                 content: Text(
                                     'There was an error in resetting counter',
                                     textAlign: TextAlign.center),
@@ -230,11 +233,14 @@ void openEditDialog(BuildContext context, String location, String dispenserId) {
                           () async {
                             if (_onSaved()) {
                               try {
+                                ScaffoldMessenger.of(context)
+                                    .hideCurrentSnackBar();
                                 await kEditDispenserLocation(
                                     location.toUpperCase(), dispenserId);
 
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
+                                    duration: Duration(seconds: 2),
                                     backgroundColor: Colors.lightGreen,
                                     content: Text(
                                       'Successsfully edited device',
@@ -244,8 +250,10 @@ void openEditDialog(BuildContext context, String location, String dispenserId) {
                                 );
                               } catch (err) {
                                 print(err.message);
+
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
+                                    duration: Duration(seconds: 2),
                                     backgroundColor:
                                         Theme.of(context).errorColor,
                                     content: Text(
@@ -409,10 +417,13 @@ void openDeleteDialog(
                           Colors.red,
                           () async {
                             try {
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
                               await kDeleteDispenser(dispenserId, context);
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
+                                  duration: Duration(seconds: 2),
                                   backgroundColor: Colors.lightGreen,
                                   content: Text(
                                     'Successsfully deleted device',
@@ -424,6 +435,7 @@ void openDeleteDialog(
                               print(err.message);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
+                                  duration: Duration(seconds: 2),
                                   backgroundColor: Theme.of(context).errorColor,
                                   content: Text(
                                     err.message,

@@ -4,7 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:align_positioned/align_positioned.dart';
+import 'package:provider/provider.dart';
 import 'package:sanitiser_app/models/const.dart';
+import 'package:sanitiser_app/provider/userProvider.dart';
 import 'package:sanitiser_app/widgets/CustomDialog.dart';
 import 'package:sanitiser_app/widgets/GeneralOutlinedButton.dart';
 import 'package:sanitiser_app/widgets/UsageRow.dart';
@@ -31,7 +33,7 @@ class InfoDialog extends StatelessWidget {
       child: Opacity(
         opacity: a1.value,
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20.0),
           child: CustomDialog(
             insetPadding: EdgeInsets.symmetric(horizontal: 0),
             child: Container(
@@ -56,6 +58,7 @@ class InfoDialog extends StatelessWidget {
                             ),
                             onPressed: () {
                               Navigator.pop(context);
+                              Provider.of<UserProvider>(context, listen: false).setMenuOpened();
                             },
                           ),
                           SizedBox(width: 20),

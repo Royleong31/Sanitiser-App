@@ -112,8 +112,9 @@ class CustomDialog extends StatelessWidget {
               color: backgroundColor ??
                   dialogTheme.backgroundColor ??
                   Theme.of(context).dialogBackgroundColor,
-              elevation:
-                  elevation ?? dialogTheme.elevation ?? _defaultElevation,
+              elevation: 0,
+              // elevation:
+              //     elevation ?? dialogTheme.elevation ?? _defaultElevation,
               shape: shape ?? dialogTheme.shape ?? _defaultDialogShape,
               type: MaterialType.card,
               clipBehavior: clipBehavior,

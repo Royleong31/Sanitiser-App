@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
@@ -36,6 +37,33 @@ class _EditProfileState extends State<EditProfile>
 
   @override
   void initState() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Got a message whilst in the foreground!');
+      print('Message data: ${message.data}');
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text("${message.notification.title}!"),
+          content: message.notification.body.isEmpty
+              ? null
+              : Text("${message.notification.body}"),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        ),
+      );
+
+      if (message.notification != null) {
+        print(
+            'Message also contained a notification: title: ${message.notification.title} body: ${message.notification.body}');
+      }
+    });
+
     _controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 300),
@@ -85,9 +113,11 @@ class _EditProfileState extends State<EditProfile>
       });
       await Provider.of<UserProvider>(context, listen: false)
           .setName(context, _name);
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          duration: Duration(seconds: 2),
           backgroundColor: Colors.lightGreen,
           content: Text(
             'Successsfully changed name',
@@ -99,6 +129,7 @@ class _EditProfileState extends State<EditProfile>
       print(err.message);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          duration: Duration(seconds: 2),
           backgroundColor: Theme.of(context).errorColor,
           content: Text(
             err.message,
@@ -121,9 +152,11 @@ class _EditProfileState extends State<EditProfile>
       });
       await Provider.of<AuthProvider>(context, listen: false)
           .changePassword(_oldPassword, _newPassword);
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          duration: Duration(seconds: 2),
           backgroundColor: Colors.lightGreen,
           content: Text(
             'Successsfully changed password',
@@ -136,6 +169,7 @@ class _EditProfileState extends State<EditProfile>
       print(err.message);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          duration: Duration(seconds: 2),
           backgroundColor: Theme.of(context).errorColor,
           content: Text(
             err.message,
@@ -163,6 +197,7 @@ class _EditProfileState extends State<EditProfile>
               color: Theme.of(context).accentColor,
             ),
             onPressed: () {
+              FocusScope.of(context).unfocus();
               setState(() {
                 menuOpened = !menuOpened;
               });

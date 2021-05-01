@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:sanitiser_app/provider/userProvider.dart';
 
 import 'DispenserContainer.dart';
 import 'OverlayMenu.dart';
@@ -28,9 +30,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               color: Theme.of(context).accentColor,
             ),
             onPressed: () {
-              setState(() {
-                menuOpened = !menuOpened;
-              });
+              Provider.of<UserProvider>(context, listen: false).setMenuOpened();
             },
           );
         },
@@ -44,6 +44,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    menuOpened = Provider.of<UserProvider>(context, listen: true).menuOpened;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: menuOpened ? null : appBar,
@@ -68,9 +69,10 @@ class _HomeWidgetState extends State<HomeWidget> {
             ),
           ),
           OverlayMenu(() {
-            setState(() {
-              menuOpened = !menuOpened;
-            });
+            Provider.of<UserProvider>(context, listen: false).setMenuOpened();
+            // setState(() {
+            //   menuOpened = !menuOpened;
+            // });
           }, menuOpened)
         ],
       ),

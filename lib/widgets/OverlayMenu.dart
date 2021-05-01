@@ -86,6 +86,9 @@ class OverlayMenu extends StatelessWidget {
                                   MenuButton(
                                       title: 'OVERVIEW',
                                       onPressed: () {
+                                        Provider.of<UserProvider>(context,
+                                                listen: false)
+                                            .setMenuOpened();
                                         Navigator.pushReplacementNamed(
                                             context, HomeScreen.routeName);
                                       }),
@@ -121,7 +124,10 @@ class OverlayMenu extends StatelessWidget {
                                             .signOut(context);
                                       } catch (e) {
                                         ScaffoldMessenger.of(context)
+                                            .hideCurrentSnackBar();
+                                        ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
+                                          duration: Duration(seconds: 2),
                                           backgroundColor:
                                               Theme.of(context).errorColor,
                                           content: Text(

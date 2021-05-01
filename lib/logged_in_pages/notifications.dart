@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitiser_app/models/const.dart';
@@ -51,6 +52,7 @@ class _NotificationsState extends State<Notifications> {
     try {
       await userProviderInfo.changeNotificationSettings(
           notificationLevel, notifyWhenRefilled);
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.lightGreen,
@@ -58,6 +60,7 @@ class _NotificationsState extends State<Notifications> {
             'Successsfully updated notification settings',
             textAlign: TextAlign.center,
           ),
+          duration: Duration(seconds: 2),
         ),
       );
     } catch (err) {
@@ -69,6 +72,7 @@ class _NotificationsState extends State<Notifications> {
             err.message,
             textAlign: TextAlign.center,
           ),
+          duration: Duration(seconds: 2),
         ),
       );
     }
@@ -76,11 +80,37 @@ class _NotificationsState extends State<Notifications> {
 
   @override
   void initState() {
-    super.initState();
     userProviderInfo = Provider.of<UserProvider>(context, listen: false);
 
     notificationLevel = userProviderInfo.notificationLevel;
     notifyWhenRefilled = userProviderInfo.notifyWhenRefilled;
+    super.initState();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Got a message whilst in the foreground!');
+      print('Message data: ${message.data}');
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text("${message.notification.title}!"),
+          content: message.notification.body.isEmpty
+              ? null
+              : Text("${message.notification.body}"),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        ),
+      );
+
+      if (message.notification != null) {
+        print(
+            'Message also contained a notification: title: ${message.notification.title} body: ${message.notification.body}');
+      }
+    });
   }
 
   @override
