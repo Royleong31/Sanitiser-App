@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:sanitiser_app/provider/companyProvider.dart';
 import 'package:sanitiser_app/provider/userProvider.dart';
 import 'package:sanitiser_app/splash_screen.dart';
 import 'package:sanitiser_app/widgets/HomeWidget.dart';
@@ -13,8 +14,14 @@ class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
+
 class _HomeScreenState extends State<HomeScreen> {
   String thisDeviceToken;
+  String userId = FirebaseAuth.instance.currentUser.uid;
+  String userDocId;
+  final usersCollection = FirebaseFirestore.instance.collection('users');
+
+  String companyId;
 
   @override
   void initState() {
@@ -67,56 +74,79 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String userId = FirebaseAuth.instance.currentUser.uid;
-    String userDocId;
-    final usersCollection = FirebaseFirestore.instance.collection('users');
+    return FutureBuilder(
+        future: usersCollection
+            .where('userId', isEqualTo: userId)
+            .get()
+            .then((QuerySnapshot snp) {
+          Map<String, dynamic> userInfo = snp.docs[0].data();
+          userDocId = snp.docs[0].id;
 
-    usersCollection
-        .where('userId', isEqualTo: userId)
-        .get()
-        .then((QuerySnapshot snp) {
-      Map<String, dynamic> userInfo = snp.docs[0].data();
+          final deviceTokens = List<String>.from(userInfo['deviceTokens']);
+          companyId = userInfo['companyId'];
 
-      userDocId = snp.docs[0].id;
+          if (!deviceTokens.contains(thisDeviceToken)) {
+            deviceTokens.add(thisDeviceToken);
+            print('adding new device token');
+          } else {
+            print('Device tokens already contains thisDeviceToken');
+          }
 
-      final deviceTokens = List<String>.from(userInfo['deviceTokens']);
-      final dispensers = List<String>.from(userInfo['dispensers']);
+          usersCollection.doc(userDocId).update({'deviceTokens': deviceTokens});
 
-      if (!deviceTokens.contains(thisDeviceToken)) {
-        deviceTokens.add(thisDeviceToken);
-        print('adding new device token');
-      } else {
-        print('Device tokens already contains thisDeviceToken');
-      }
+          Provider.of<UserProvider>(context, listen: false).setValues(
+            name: userInfo['name'],
+            userId: userInfo['userId'],
+            email: userInfo['email'],
+            notificationLevel: userInfo['notificationLevel'],
+            notifyWhenRefilled: userInfo['notifyWhenRefilled'],
+            deviceTokens: deviceTokens,
+            deviceToken: thisDeviceToken,
+            userDocId: userDocId,
+            companyId: companyId,
+          );
 
-      usersCollection.doc(userDocId).update({'deviceTokens': deviceTokens});
+          return companyId;
+        }).then((companyId) {
+          print('Company ID HOME PAGE: $companyId');
+          final companyDoc =
+              FirebaseFirestore.instance.collection('companies').doc(companyId);
+          return companyDoc.get();
+        }).then((companyDocDetails) {
+          final companyData = companyDocDetails.data();
+          final companyId = companyDocDetails.id;
+          final dispensers = List<String>.from(companyData['dispensers']);
+          final users = List<String>.from(companyData['users']);
+          final companyName = companyData['companyName'];
 
-      Provider.of<UserProvider>(context, listen: false).setValues(
-        name: userInfo['name'],
-        userId: userInfo['userId'],
-        email: userInfo['email'],
-        notificationLevel: userInfo['notificationLevel'],
-        notifyWhenRefilled: userInfo['notifyWhenRefilled'],
-        deviceTokens: deviceTokens,
-        dispensers: dispensers,
-        deviceToken: thisDeviceToken,
-        userDocId: userDocId,
-      );
-    });
+          Provider.of<CompanyProvider>(context, listen: false).setValues(
+              companyName: companyName, dispensers: dispensers, users: users, companyId: companyId);
+        }),
+        builder: (ctx, futureSnapshot) {
+          if (futureSnapshot.connectionState == ConnectionState.waiting)
+            return SplashScreen();
 
-    return StreamBuilder(
-      stream: FirebaseFirestore.instance
-          .collection('dispensers')
-          .where('userId', isEqualTo: userId)
-          .snapshots(),
-      builder: (ctx, dispenserSnapshot) {
-        if (dispenserSnapshot.connectionState == ConnectionState.waiting)
-          return SplashScreen();
+          return StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection('dispensers')
+                .where('companyId',
+                    isEqualTo: Provider.of<UserProvider>(context, listen: false)
+                        .companyId)
+                .snapshots(),
+            builder: (ctx, dispenserSnapshot) {
+              if (dispenserSnapshot.connectionState == ConnectionState.waiting)
+                return SplashScreen();
 
-        final List<QueryDocumentSnapshot> dispenserData =
-            dispenserSnapshot.data.docs;
-        return HomeWidget(dispenserData);
-      },
-    );
+              if (dispenserSnapshot.data == null) {
+                print('Dispenser snapshot: ${dispenserSnapshot.data}');
+                return SplashScreen();
+              }
+
+              final List<QueryDocumentSnapshot> dispenserData =
+                  dispenserSnapshot.data.docs;
+              return HomeWidget(dispenserData);
+            },
+          );
+        });
   }
 }

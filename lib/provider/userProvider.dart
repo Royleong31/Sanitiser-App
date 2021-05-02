@@ -3,8 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class UserProvider with ChangeNotifier {
-  String _name, _userId, _email, _thisDeviceToken, _userDocId;
-  List<String> _dispensers, _deviceTokens;
+  String _name, _userId, _email, _thisDeviceToken, _userDocId, _companyId;
+  List<String> _deviceTokens;
+  List<String> _dispensers = [];
   int _notificationLevel;
   bool _notifyWhenRefilled;
   bool menuOpened = false;
@@ -14,23 +15,22 @@ class UserProvider with ChangeNotifier {
     @required String userId,
     @required String email,
     @required List<String> deviceTokens,
-    @required List<String> dispensers,
     @required String deviceToken,
     @required String userDocId,
     @required int notificationLevel,
     @required bool notifyWhenRefilled,
+    @required String companyId,
   }) {
     this._name = name;
     this._userId = userId;
     this._email = email;
     this._deviceTokens = deviceTokens;
-    this._dispensers = dispensers;
     this._thisDeviceToken = deviceToken;
     this._userDocId = userDocId;
     this._notificationLevel = notificationLevel;
     this._notifyWhenRefilled = notifyWhenRefilled;
-
-    print('Dispenser List: $_dispensers');
+    this._companyId = companyId;
+    print('Company ID: $_companyId');
   }
 
   void setMenuOpened() {
@@ -43,9 +43,9 @@ class UserProvider with ChangeNotifier {
   String get name => _name;
   String get userId => _userId;
   String get email => _email;
+  String get companyId => _companyId;
   int get notificationLevel => _notificationLevel;
   bool get notifyWhenRefilled => _notifyWhenRefilled;
-  List<String> get dispensers => _dispensers;
 
   set setEmail(String newEmail) {
     _email = newEmail;

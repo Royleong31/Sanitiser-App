@@ -31,7 +31,6 @@ class AuthProvider with ChangeNotifier {
         'name': name,
         'email': email,
         'deviceTokens': [],
-        'dispensers': [],
         'userId': newUserId,
         'notificationLevel': 10, // DEFAULT NOTIFICATION LEVEL IS 10%
         'notifyWhenRefilled': true,
@@ -84,13 +83,13 @@ class AuthProvider with ChangeNotifier {
     deviceTokensList.remove(deviceToken);
 
     await firebaseDocData.update({'deviceTokens': deviceTokensList});
-    notifyListeners();
     await firebaseAuth.signOut();
     await Navigator.of(context).pushNamedAndRemoveUntil(
         '/', ModalRoute.withName(WelcomeScreen.routeName));
 
     print('User document id: $userDocId');
     print('device Token List: $deviceTokensList');
+    notifyListeners();
   }
 
   Future<void> changePassword(String oldPassword, String newpassword) async {

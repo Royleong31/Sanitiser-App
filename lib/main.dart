@@ -13,6 +13,7 @@ import './models/custom_route.dart';
 import 'admin_pages/welcome_screen.dart';
 import 'logged_in_pages/editDevices.dart';
 import 'logged_in_pages/notifications.dart';
+import 'provider/companyProvider.dart';
 import 'splash_screen.dart';
 import 'provider/userProvider.dart';
 
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => CompanyProvider()),
         ChangeNotifierProvider<AuthProvider>(
           create: (_) => AuthProvider(FirebaseAuth.instance),
         ),

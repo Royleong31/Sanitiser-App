@@ -7,6 +7,7 @@ import 'package:sanitiser_app/logged_in_pages/editProfile.dart';
 import 'package:sanitiser_app/logged_in_pages/homeScreen.dart';
 import 'package:sanitiser_app/logged_in_pages/notifications.dart';
 import 'package:sanitiser_app/provider/authProvider.dart';
+import 'package:sanitiser_app/provider/companyProvider.dart';
 import 'package:sanitiser_app/provider/userProvider.dart';
 
 import 'GeneralOutlinedButton.dart';
@@ -69,20 +70,38 @@ class OverlayMenu extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Consumer<UserProvider>(
-                                    builder: (BuildContext ctx, userData, _) =>
-                                        Text(
-                                      'WELCOME \n${userData.name}'
-                                          .toUpperCase(),
-                                      style: TextStyle(
-                                        fontSize: 30,
-                                        fontWeight: FontWeight.w400,
-                                        color: Theme.of(context)
-                                            .secondaryHeaderColor,
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          Provider.of<UserProvider>(context,
+                                                  listen: false)
+                                              .name
+                                              .toUpperCase(),
+                                          style: TextStyle(
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.w400,
+                                            color: Theme.of(context)
+                                                .secondaryHeaderColor,
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                      SizedBox(width: 20),
+                                      FittedBox(
+                                        fit: BoxFit.fitWidth,
+                                        child: Text(
+                                            Provider.of<CompanyProvider>(
+                                                    context,
+                                                    listen: false)
+                                                .companyName),
+                                      ),
+                                    ],
                                   ),
-                                  SizedBox(height: 50),
+                                  SizedBox(height: 80),
                                   MenuButton(
                                       title: 'HOME',
                                       onPressed: () {
@@ -112,7 +131,7 @@ class OverlayMenu extends StatelessWidget {
                                           context, EditDevices.routeName);
                                     },
                                   ),
-                                  SizedBox(height: 70),
+                                  SizedBox(height: 80),
                                   Align(
                                     alignment: Alignment.center,
                                     child: GeneralOutlinedButton('LOG OUT',

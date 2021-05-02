@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sanitiser_app/provider/userProvider.dart';
+import 'package:sanitiser_app/provider/companyProvider.dart';
 
 Future<void> kAddNewDispenser(String deviceLocation, String dispenserId,
     String userId, BuildContext context) async {
@@ -14,10 +14,12 @@ Future<void> kAddNewDispenser(String deviceLocation, String dispenserId,
       'location': deviceLocation,
       'useCount': 0,
       'userId': userId,
+      'companyId':
+          Provider.of<CompanyProvider>(context, listen: false).companyId,
     },
   );
 
-  Provider.of<UserProvider>(context, listen: false).addNewDispenser(
+  Provider.of<CompanyProvider>(context, listen: false).addNewDispenser(
       dispenserId); // not async as it is not as impt as updating cloud database so this prevents time wastage.
 }
 
@@ -48,6 +50,6 @@ Future<void> kDeleteDispenser(String dispenserId, BuildContext context) async {
       .doc(dispenserDocId)
       .delete();
 
-  Provider.of<UserProvider>(context, listen: false)
+  Provider.of<CompanyProvider>(context, listen: false)
       .deleteDispenser(dispenserId);
 }

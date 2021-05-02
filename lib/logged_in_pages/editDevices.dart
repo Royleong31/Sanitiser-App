@@ -9,6 +9,7 @@ import 'package:sanitiser_app/models/CustomException.dart';
 import 'package:sanitiser_app/models/const.dart';
 import 'package:sanitiser_app/models/dialogs.dart';
 import 'package:sanitiser_app/models/firebaseDispenser.dart';
+import 'package:sanitiser_app/provider/companyProvider.dart';
 import 'package:sanitiser_app/provider/userProvider.dart';
 import 'package:sanitiser_app/widgets/CustomInputField.dart';
 import 'package:sanitiser_app/widgets/GeneralButton.dart';
@@ -33,11 +34,18 @@ class _EditDevicesState extends State<EditDevices> {
     return StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection('dispensers')
-          .where('userId', isEqualTo: _userId)
+          .where('companyId',
+              isEqualTo:
+                  Provider.of<UserProvider>(context, listen: false).companyId)
           .snapshots(),
       builder: (ctx, dispenserSnapshot) {
         if (dispenserSnapshot.connectionState == ConnectionState.waiting)
           return SplashScreen();
+
+        if (dispenserSnapshot.data == null) {
+          print('Dispenser snapshot: ${dispenserSnapshot.data}');
+          return SplashScreen();
+        }
 
         final List<QueryDocumentSnapshot> dispenserData =
             dispenserSnapshot.data.docs;
