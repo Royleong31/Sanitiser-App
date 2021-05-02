@@ -17,6 +17,7 @@ class AuthProvider with ChangeNotifier {
     @required String password,
     @required BuildContext context,
     @required String name,
+    @required String companyId,
   }) async {
     print('Trying to sign up');
     print('Email: $email, password: $password');
@@ -24,15 +25,27 @@ class AuthProvider with ChangeNotifier {
       final newUser = await firebaseAuth.createUserWithEmailAndPassword(
           email: email, password: password);
 
+      final newUserId = newUser.user.uid;
+
       await FirebaseFirestore.instance.collection('users').add({
         'name': name,
         'email': email,
         'deviceTokens': [],
         'dispensers': [],
-        'userId': newUser.user.uid,
+        'userId': newUserId,
         'notificationLevel': 10, // DEFAULT NOTIFICATION LEVEL IS 10%
         'notifyWhenRefilled': true,
+        'companyId': companyId,
       });
+
+      final companyDoc =
+          FirebaseFirestore.instance.collection('companies').doc(companyId);
+      final companyDocDetails = await companyDoc.get();
+      // final companyDispensersList = List<String>.from(companyDocDetails.data()['dispensers']);
+      final companyUsersList =
+          List<String>.from(companyDocDetails.data()['users']);
+      companyUsersList.add(newUserId);
+      await companyDoc.update({'users': companyUsersList});
 
       Navigator.pop(context);
       print('signed up!');
@@ -65,21 +78,19 @@ class AuthProvider with ChangeNotifier {
     final firebaseDocData =
         FirebaseFirestore.instance.collection('users').doc(userDocId);
 
-    await firebaseAuth.signOut();
-
     final userDoc = await firebaseDocData.get();
     final deviceTokensList = List<String>.from(userDoc.data()['deviceTokens']);
 
     deviceTokensList.remove(deviceToken);
 
-    firebaseDocData.update({'deviceTokens': deviceTokensList});
+    await firebaseDocData.update({'deviceTokens': deviceTokensList});
     notifyListeners();
+    await firebaseAuth.signOut();
+    await Navigator.of(context).pushNamedAndRemoveUntil(
+        '/', ModalRoute.withName(WelcomeScreen.routeName));
 
     print('User document id: $userDocId');
     print('device Token List: $deviceTokensList');
-
-    await Navigator.of(context).pushNamedAndRemoveUntil(
-        '/', ModalRoute.withName(WelcomeScreen.routeName));
   }
 
   Future<void> changePassword(String oldPassword, String newpassword) async {

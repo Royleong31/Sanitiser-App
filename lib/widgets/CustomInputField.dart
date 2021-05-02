@@ -37,7 +37,7 @@ class CustomInputField extends StatelessWidget {
         Container(
           width: 280,
           height: 60,
-          margin: EdgeInsets.only(bottom: 10),
+          margin: EdgeInsets.only(bottom: 8),
           // padding: EdgeInsets.symmetric(vertical: 15),
           child: TextFormField(
             initialValue: initialValue,

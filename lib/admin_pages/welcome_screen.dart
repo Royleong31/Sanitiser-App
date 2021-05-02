@@ -23,12 +23,12 @@ class WelcomeScreen extends StatelessWidget {
           child: Center(
             child: Column(
               children: [
-                SizedBox(height: 143),
+                SizedBox(height: 130),
                 Text(
                   'WELCOME',
                   style: TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
                 ),
-                SizedBox(height: 330),
+                SizedBox(height: 360),
                 ColoredWelcomeButton(() {
                   Navigator.pushNamed(context, LoginScreen.routeName);
                 }, 'LOG IN'),

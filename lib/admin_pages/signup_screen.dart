@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitiser_app/provider/authProvider.dart';
@@ -13,16 +14,16 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  String _name, _email, _password;
+  String _name, _email, _password, _companyId;
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool showSpinner = false;
+  List<Map<String, String>> listOfCompanies;
 
   bool _onSaved() {
     final isValid = _formKey.currentState.validate();
     if (!isValid) return false;
     _formKey.currentState.save();
-    print('Name: $_name, Email: $_email, Password: $_password');
     FocusScope.of(context).unfocus();
     return true;
   }
@@ -34,7 +35,11 @@ class _SignupScreenState extends State<SignupScreen> {
 
     Provider.of<AuthProvider>(context, listen: false)
         .signUp(
-            email: _email, password: _password, context: context, name: _name)
+            email: _email,
+            password: _password,
+            context: context,
+            name: _name,
+            companyId: _companyId)
         .catchError(
       (err) {
         print('Error message: $err');
@@ -50,6 +55,24 @@ class _SignupScreenState extends State<SignupScreen> {
         );
       },
     ).whenComplete(() => setState(() => showSpinner = false));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    listOfCompanies = [];
+    FirebaseFirestore.instance
+        .collection('companies')
+        .get()
+        .then((QuerySnapshot snp) {
+      snp.docs.forEach((element) {
+        print('ELEMENT ID: ${element.id}');
+        listOfCompanies.add({
+          'id': element.id,
+          'name': element.data()['companyName'],
+        });
+      });
+    });
   }
 
   @override
@@ -86,7 +109,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: Column(
                     children: [
                       SizedBox(
-                          height: 143 -
+                          height: 130 -
                               AppBar().preferredSize.height -
                               MediaQuery.of(context).padding.top),
                       Text(
@@ -94,11 +117,39 @@ class _SignupScreenState extends State<SignupScreen> {
                         style: TextStyle(
                             fontSize: 30, fontWeight: FontWeight.w400),
                       ),
-                      SizedBox(height: 80),
+                      SizedBox(height: 40),
                       CustomInputField(
                         label: 'NAME',
                         saveHandler: (val) => _name = val.trim(),
                       ),
+                      CustomInputField(
+                          label: 'COMPANY NAME',
+                          saveHandler: (val) {
+                            var selectedCompany = val.trim();
+                            selectedCompany = selectedCompany.toUpperCase();
+                            print('Selected COmpany: $selectedCompany');
+                            var companyDetails = listOfCompanies.firstWhere(
+                                (element) =>
+                                    element['name'] == selectedCompany);
+
+                            _companyId = companyDetails['id'];
+                            print('Company ID: $_companyId');
+                          },
+                          validatorHandler: (val) {
+                            val = val.trim();
+                            val = val.toUpperCase();
+                            print("value is: $val");
+                            final selectedCompany = listOfCompanies
+                                .firstWhere((element) => element['name'] == val,
+                                    orElse: () {
+                              print('no element found');
+                              return null;
+                            });
+                            print('Selected Company: $selectedCompany');
+                            if (selectedCompany == null)
+                              return 'Invalid Company Name';
+                            return null;
+                          }),
                       CustomInputField(
                         label: 'EMAIL',
                         saveHandler: (val) => _email = val.trim(),
@@ -132,8 +183,11 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       SizedBox(height: 20),
                       ColoredWelcomeButton(() {
+                        print('Company id: $_companyId');
+                        print('list of companies: $listOfCompanies');
                         if (_onSaved()) _registerUser();
-                      }, 'CREATE ACCOUNT')
+                      }, 'CREATE ACCOUNT'),
+                      SizedBox(height: 10),
                     ],
                   ),
                 ),

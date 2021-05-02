@@ -84,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     children: [
                       SizedBox(
-                          height: 143 -
+                          height: 130 -
                               AppBar().preferredSize.height -
                               MediaQuery.of(context).padding.top),
                       Text(
@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(
                             fontSize: 30, fontWeight: FontWeight.w400),
                       ),
-                      SizedBox(height: 80),
+                      SizedBox(height: 40),
                       CustomInputField(
                         label: 'EMAIL',
                         saveHandler: (val) => _email = val.trim(),

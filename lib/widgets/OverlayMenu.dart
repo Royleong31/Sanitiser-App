@@ -84,7 +84,7 @@ class OverlayMenu extends StatelessWidget {
                                   ),
                                   SizedBox(height: 50),
                                   MenuButton(
-                                      title: 'OVERVIEW',
+                                      title: 'HOME',
                                       onPressed: () {
                                         Provider.of<UserProvider>(context,
                                                 listen: false)

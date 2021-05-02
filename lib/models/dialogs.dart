@@ -557,6 +557,7 @@ void openForgotPasswordDialog(BuildContext context) {
 
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
+                                      duration: Duration(seconds: 10),
                                       backgroundColor: Colors.lightGreen,
                                       content: Text(
                                         'An email was sent to your email address to reset your password',
@@ -568,6 +569,7 @@ void openForgotPasswordDialog(BuildContext context) {
                                   print(err.message);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
+                                      duration: Duration(seconds: 10),
                                       backgroundColor:
                                           Theme.of(context).errorColor,
                                       content: Text(
