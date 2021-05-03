@@ -58,7 +58,8 @@ class InfoDialog extends StatelessWidget {
                             ),
                             onPressed: () {
                               Navigator.pop(context);
-                              Provider.of<UserProvider>(context, listen: false).setMenuOpened();
+                              Provider.of<UserProvider>(context, listen: false)
+                                  .setMenuOpened();
                             },
                           ),
                           SizedBox(width: 20),
@@ -162,35 +163,6 @@ class InfoDialog extends StatelessWidget {
                                   padding: EdgeInsets.all(0),
                                   children: lastUsedData,
                                 ),
-
-                                // ListView.builder(
-                                //   reverse: true,
-                                //   padding: EdgeInsets.all(0),
-                                //   itemCount: usageData.length,
-                                //   itemBuilder: (ctx, i) {
-                                //     initializeDateFormatting('en_SG');
-                                //     final Map<String, dynamic> currentUsage =
-                                //         usageData[i].data();
-
-                                //     final DateTime timeStamp = DateTime.parse(
-                                //             currentUsage['timeStamp'])
-                                //         .toLocal();
-
-                                //     final date =
-                                //         DateFormat.yMd().format(timeStamp);
-                                //     final time =
-                                //         DateFormat.Hm().format(timeStamp);
-
-                                //     if (!currentUsage['wasUsed']) {
-                                //       useCount = 0;
-                                //       return UsageRow('REFILLED', date, time,
-                                //           refilled: true);
-                                //     }
-
-                                //     useCount++;
-                                //     return UsageRow('$useCount', date, time);
-                                //   },
-                                // ),
                               ),
                             );
                           },

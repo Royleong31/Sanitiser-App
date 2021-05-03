@@ -5,15 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitiser_app/models/const.dart';
 import 'package:sanitiser_app/models/firebaseDispenser.dart';
-import 'package:sanitiser_app/provider/userProvider.dart';
+import 'package:sanitiser_app/provider/companyProvider.dart';
 import 'package:sanitiser_app/widgets/CustomInputField.dart';
 import 'package:sanitiser_app/widgets/GeneralButton.dart';
 import 'package:sanitiser_app/widgets/InfoDialog.dart';
 import 'package:http/http.dart' as http;
 
 void openResetDialog(BuildContext context, String dispenserId) {
-  final String userId =
-      Provider.of<UserProvider>(context, listen: false).userId;
+  // TODO: Fix bug that causes screen to turn dark!
+  final String companyId =
+      Provider.of<CompanyProvider>(context, listen: false).companyId;
 
   showGeneralDialog(
     barrierColor: Colors.transparent,
@@ -58,31 +59,26 @@ void openResetDialog(BuildContext context, String dispenserId) {
                           () async {
                             final url = Uri.https(
                               'us-central1-hand-sanitiser-c33d1.cloudfunctions.net',
-                              '/usage/$userId/$dispenserId/reset',
+                              '/usage/$companyId/$dispenserId/reset',
                             );
 
                             http.Response response;
                             ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
                             try {
                               response = await http.patch(url);
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(
-                                content: Text('Successfully reset counter!',
-                                    textAlign: TextAlign.center),
-                                backgroundColor: Colors.lightGreen,
-                                duration: Duration(seconds: 2),
-                              ));
-                              Navigator.of(context).pop();
+                              print('Response: ${response.statusCode}');
+                              if (response.statusCode >= 400)
+                                throw response.body;
                             } catch (e) {
-                              print(e);
+                              print("Error Message: $e");
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(SnackBar(
-                                duration: Duration(seconds: 2),
-                                content: Text(
-                                    'There was an error in resetting counter',
+                                duration: Duration(seconds: 4),
+                                content: Text('There was an error in resetting',
                                     textAlign: TextAlign.center),
-                                backgroundColor: kLowColor,
+                                backgroundColor: Theme.of(context).errorColor,
                               ));
                             } finally {
                               print(response.body);
@@ -371,8 +367,8 @@ void addDeviceDialog(BuildContext context, Function qrHandler) {
   );
 }
 
-void openDeleteDialog(
-    BuildContext context, String dispenserId, String location) {
+void openDeleteDialog(BuildContext context, String dispenserId, String location,
+    Function removeLocationHandler) {
   showGeneralDialog(
     barrierColor: Colors.transparent,
     transitionBuilder: (context, a1, a2, widget) {
@@ -443,6 +439,8 @@ void openDeleteDialog(
                               ScaffoldMessenger.of(context)
                                   .hideCurrentSnackBar();
                               await kDeleteDispenser(dispenserId, context);
+
+                              removeLocationHandler(location);
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(

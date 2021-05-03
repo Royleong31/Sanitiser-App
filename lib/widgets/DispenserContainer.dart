@@ -111,11 +111,11 @@ class DispenserContainer extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 GeneralButton(
-                    'RESET COUNT',
+                    'RESET',
                     kLightGreyColor,
                     level == 100
                         ? () {
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 duration: Duration(seconds: 2),

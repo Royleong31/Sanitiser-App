@@ -9,7 +9,6 @@ import 'package:sanitiser_app/models/CustomException.dart';
 import 'package:sanitiser_app/models/const.dart';
 import 'package:sanitiser_app/models/dialogs.dart';
 import 'package:sanitiser_app/models/firebaseDispenser.dart';
-import 'package:sanitiser_app/provider/companyProvider.dart';
 import 'package:sanitiser_app/provider/userProvider.dart';
 import 'package:sanitiser_app/widgets/CustomInputField.dart';
 import 'package:sanitiser_app/widgets/GeneralButton.dart';
@@ -287,6 +286,11 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
     );
   }
 
+  void removeLocationHandler(String deletedLocation) {
+    locationList.remove(deletedLocation);
+    print('Location List after deletion: $locationList');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -338,11 +342,13 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
                             final Map<String, dynamic> currentDoc =
                                 widget.dispenserData[i].data();
                             final locationName = currentDoc['location'];
-                            locationList.add(locationName);
+                            if (!locationList.contains(locationName))
+                              locationList.add(locationName);
                             print('Location List: $locationList');
                             return DeviceListTile(
                               location: locationName,
                               dispenserId: currentDoc['dispenserId'],
+                              removeLocationHandler: removeLocationHandler,
                             );
                           },
                         ),
@@ -390,8 +396,9 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
 }
 
 class DeviceListTile extends StatelessWidget {
-  DeviceListTile({this.location, this.dispenserId});
+  DeviceListTile({this.location, this.dispenserId, this.removeLocationHandler});
   final String location, dispenserId;
+  final Function removeLocationHandler;
 
   @override
   Widget build(BuildContext context) {
@@ -436,8 +443,11 @@ class DeviceListTile extends StatelessWidget {
                           FontAwesomeIcons.solidTrashAlt,
                           size: 24,
                         ),
-                        onTap: () => openDeleteDialog(context, dispenserId,
-                            location)), // need dispenser ID to delete the device
+                        onTap: () => openDeleteDialog(
+                            context,
+                            dispenserId,
+                            location,
+                            removeLocationHandler)), // need dispenser ID to delete the device
                   ],
                 ),
               )

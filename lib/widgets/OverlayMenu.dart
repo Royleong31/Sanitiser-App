@@ -70,6 +70,7 @@ class OverlayMenu extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  SizedBox(height: 10),
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -83,7 +84,7 @@ class OverlayMenu extends StatelessWidget {
                                               .name
                                               .toUpperCase(),
                                           style: TextStyle(
-                                            fontSize: 28,
+                                            fontSize: 30,
                                             fontWeight: FontWeight.w400,
                                             color: Theme.of(context)
                                                 .secondaryHeaderColor,
@@ -101,7 +102,7 @@ class OverlayMenu extends StatelessWidget {
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: 80),
+                                  SizedBox(height: 70),
                                   MenuButton(
                                       title: 'HOME',
                                       onPressed: () {
@@ -131,7 +132,7 @@ class OverlayMenu extends StatelessWidget {
                                           context, EditDevices.routeName);
                                     },
                                   ),
-                                  SizedBox(height: 80),
+                                  SizedBox(height: 70),
                                   Align(
                                     alignment: Alignment.center,
                                     child: GeneralOutlinedButton('LOG OUT',
