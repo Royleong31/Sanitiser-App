@@ -20,10 +20,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _onSaved() {
     final isValid = _formKey.currentState.validate();
+    FocusScope.of(context).unfocus();
     if (!isValid) return false;
     _formKey.currentState.save();
     print('Email Value: $_email, Password Value: $_password');
-    FocusScope.of(context).unfocus();
     return true;
   }
 

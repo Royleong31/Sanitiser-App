@@ -291,6 +291,16 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
     print('Location List after deletion: $locationList');
   }
 
+  bool editLocationHandler(String oldLocation, String newLocation) {
+    final index = locationList.indexOf(oldLocation);
+    print("Location List: $locationList");
+    print('New location: $newLocation');
+    if (locationList.contains(newLocation)) return false;
+    locationList[index] = newLocation;
+    print('Location List after editing: $locationList');
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -349,6 +359,7 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
                               location: locationName,
                               dispenserId: currentDoc['dispenserId'],
                               removeLocationHandler: removeLocationHandler,
+                              editLocationHandler: editLocationHandler,
                             );
                           },
                         ),
@@ -396,9 +407,13 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
 }
 
 class DeviceListTile extends StatelessWidget {
-  DeviceListTile({this.location, this.dispenserId, this.removeLocationHandler});
+  DeviceListTile(
+      {this.location,
+      this.dispenserId,
+      this.removeLocationHandler,
+      this.editLocationHandler});
   final String location, dispenserId;
-  final Function removeLocationHandler;
+  final Function removeLocationHandler, editLocationHandler;
 
   @override
   Widget build(BuildContext context) {
@@ -435,8 +450,11 @@ class DeviceListTile extends StatelessWidget {
                   children: [
                     GestureDetector(
                         child: FaIcon(FontAwesomeIcons.solidEdit, size: 24),
-                        onTap: () => openEditDialog(context, location,
-                            dispenserId)), // insert dispenser ID and location to autofill into textfield
+                        onTap: () => openEditDialog(
+                            context,
+                            location,
+                            dispenserId,
+                            editLocationHandler)), // insert dispenser ID and location to autofill into textfield
                     SizedBox(width: 20),
                     GestureDetector(
                         child: FaIcon(

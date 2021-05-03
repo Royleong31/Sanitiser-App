@@ -90,6 +90,7 @@ class _EditProfileState extends State<EditProfile>
 
   bool _onSaved() {
     final isValid = _formKey.currentState.validate();
+    FocusScope.of(context).unfocus();
     if (!isValid) return false;
     _formKey.currentState.save();
     print('Name Value: $_name');
@@ -113,7 +114,7 @@ class _EditProfileState extends State<EditProfile>
       });
       await Provider.of<UserProvider>(context, listen: false)
           .setName(context, _name);
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -152,7 +153,7 @@ class _EditProfileState extends State<EditProfile>
       });
       await Provider.of<AuthProvider>(context, listen: false)
           .changePassword(_oldPassword, _newPassword);
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -250,6 +251,13 @@ class _EditProfileState extends State<EditProfile>
                                   label: 'NAME',
                                   initialValue: userProviderDetails.name,
                                   saveHandler: (val) => _name = val.trim(),
+                                  validatorHandler: (val) {
+                                    if (val.isEmpty)
+                                      return 'Name cannot be empty';
+                                    if (val.length > 15)
+                                      return 'Name needs to be shorter than 15 characters';
+                                    return null;
+                                  },
                                 ),
                               if (showPasswordInfo) // IF EDITING PASSWORD
                                 Column(children: [

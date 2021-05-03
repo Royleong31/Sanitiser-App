@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:sanitiser_app/models/const.dart';
 import 'package:sanitiser_app/models/firebaseDispenser.dart';
 import 'package:sanitiser_app/provider/companyProvider.dart';
+import 'package:sanitiser_app/provider/userProvider.dart';
 import 'package:sanitiser_app/widgets/CustomInputField.dart';
 import 'package:sanitiser_app/widgets/GeneralButton.dart';
 import 'package:sanitiser_app/widgets/InfoDialog.dart';
@@ -69,6 +70,21 @@ void openResetDialog(BuildContext context, String dispenserId) {
                               print('Response: ${response.statusCode}');
                               if (response.statusCode >= 400)
                                 throw response.body;
+
+                              if (!Provider.of<UserProvider>(context,
+                                      listen: false)
+                                  .notifyWhenRefilled) {
+                                ScaffoldMessenger.of(context)
+                                    .hideCurrentSnackBar();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      duration: Duration(seconds: 2),
+                                      content: Text(
+                                          'Successfully reset dispenser',
+                                          textAlign: TextAlign.center),
+                                      backgroundColor: Colors.lightGreen),
+                                );
+                              }
                             } catch (e) {
                               print("Error Message: $e");
                               ScaffoldMessenger.of(context)
@@ -128,14 +144,16 @@ void openInfoDialog(BuildContext context, String dispenserId, String location) {
   );
 }
 
-void openEditDialog(BuildContext context, String location, String dispenserId) {
+void openEditDialog(BuildContext context, String location, String dispenserId,
+    Function editLocationHandler) {
   final _formKey = GlobalKey<FormState>();
+  String _newLocation;
 
   bool _onSaved() {
     final isValid = _formKey.currentState.validate();
     if (!isValid) return false;
     _formKey.currentState.save();
-    print('Location: $location');
+    print('Location: $_newLocation');
     return true;
   }
 
@@ -185,10 +203,16 @@ void openEditDialog(BuildContext context, String location, String dispenserId) {
                           child: TextFormField(
                             initialValue: location,
                             cursorColor: Colors.black,
-                            onSaved: (val) => location = val.trim(),
+                            onSaved: (val) =>
+                                _newLocation = val.trim().toUpperCase(),
                             validator: (val) {
                               if (val.length == 0)
                                 return 'Location name cannot be empty';
+                              if (!editLocationHandler(
+                                location,
+                                val.trim().toUpperCase(),
+                              ))
+                                return 'Dispenser with this location already exists';
                               return null;
                             },
                             decoration: InputDecoration(
@@ -232,8 +256,9 @@ void openEditDialog(BuildContext context, String location, String dispenserId) {
                               try {
                                 ScaffoldMessenger.of(context)
                                     .hideCurrentSnackBar();
+
                                 await kEditDispenserLocation(
-                                    location.toUpperCase(), dispenserId);
+                                    _newLocation, dispenserId);
 
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(

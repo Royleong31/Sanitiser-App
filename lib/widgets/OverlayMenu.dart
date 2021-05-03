@@ -70,39 +70,42 @@ class OverlayMenu extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  SizedBox(height: 10),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          Provider.of<UserProvider>(context,
-                                                  listen: false)
-                                              .name
-                                              .toUpperCase(),
-                                          style: TextStyle(
-                                            fontSize: 30,
-                                            fontWeight: FontWeight.w400,
-                                            color: Theme.of(context)
-                                                .secondaryHeaderColor,
+                                  Container(
+                                    height: 130,
+                                    // color: Colors.blue,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            Provider.of<UserProvider>(context,
+                                                    listen: false)
+                                                .name
+                                                .toUpperCase(),
+                                            style: TextStyle(
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.w400,
+                                              color: Theme.of(context)
+                                                  .secondaryHeaderColor,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      SizedBox(width: 20),
-                                      FittedBox(
-                                        fit: BoxFit.fitWidth,
-                                        child: Text(
-                                            Provider.of<CompanyProvider>(
-                                                    context,
-                                                    listen: false)
-                                                .companyName),
-                                      ),
-                                    ],
+                                        SizedBox(width: 20),
+                                        FittedBox(
+                                          fit: BoxFit.fitWidth,
+                                          child: Text(
+                                              Provider.of<CompanyProvider>(
+                                                      context,
+                                                      listen: false)
+                                                  .companyName),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  SizedBox(height: 70),
+                                  SizedBox(height: 30),
                                   MenuButton(
                                       title: 'HOME',
                                       onPressed: () {

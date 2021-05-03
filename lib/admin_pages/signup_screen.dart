@@ -22,9 +22,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
   bool _onSaved() {
     final isValid = _formKey.currentState.validate();
+    FocusScope.of(context).unfocus();
     if (!isValid) return false;
     _formKey.currentState.save();
-    FocusScope.of(context).unfocus();
     return true;
   }
 
@@ -121,6 +121,12 @@ class _SignupScreenState extends State<SignupScreen> {
                       CustomInputField(
                         label: 'NAME',
                         saveHandler: (val) => _name = val.trim(),
+                        validatorHandler: (val) {
+                          if (val.isEmpty) return 'Name cannot be empty';
+                          if (val.length > 15)
+                            return 'Name needs to be shorter than 15 characters';
+                          return null;
+                        },
                       ),
                       CustomInputField(
                           label: 'COMPANY NAME',
