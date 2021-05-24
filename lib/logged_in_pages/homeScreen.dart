@@ -17,7 +17,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String thisDeviceToken;
-  String userId = FirebaseAuth.instance.currentUser.uid;
+  String userId = FirebaseAuth.instance.currentUser.uid; // ?: firebase auth id of the logged in user
   String userDocId;
   final usersCollection = FirebaseFirestore.instance.collection('users');
 
@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     });
 
-    messaging.getToken().then((deviceToken) {
+    messaging.getToken().then((deviceToken) { // ?: Get the device token
       thisDeviceToken = deviceToken;
       print('Device Token: $deviceToken');
     });
@@ -80,13 +80,13 @@ class _HomeScreenState extends State<HomeScreen> {
             .get()
             .then((QuerySnapshot snp) {
           Map<String, dynamic> userInfo = snp.docs[0].data();
-          userDocId = snp.docs[0].id;
+          userDocId = snp.docs[0].id; // ?: Get the id of the user document
 
           final deviceTokens = List<String>.from(userInfo['deviceTokens']);
           companyId = userInfo['companyId'];
 
           if (!deviceTokens.contains(thisDeviceToken)) {
-            deviceTokens.add(thisDeviceToken);
+            deviceTokens.add(thisDeviceToken); // ?: add the device token of the current device if it is not alr in the user's list of device tokens
             print('adding new device token');
           } else {
             print('Device tokens already contains thisDeviceToken');
@@ -107,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
 
           return companyId;
-        }).then((companyId) {
+        }).then((companyId) { // ?: Don't actually need this .then as companyId is not a Future
           print('Company ID HOME PAGE: $companyId');
           final companyDoc =
               FirebaseFirestore.instance.collection('companies').doc(companyId);
@@ -123,10 +123,10 @@ class _HomeScreenState extends State<HomeScreen> {
               companyName: companyName, dispensers: dispensers, users: users, companyId: companyId);
         }),
         builder: (ctx, futureSnapshot) {
-          if (futureSnapshot.connectionState == ConnectionState.waiting)
+          if (futureSnapshot.connectionState == ConnectionState.waiting) // ?: If data has not been received yet, show a loading screen
             return SplashScreen();
 
-          return StreamBuilder(
+          return StreamBuilder( // ?: Stream builders continuously listen for new data and update the UI
             stream: FirebaseFirestore.instance
                 .collection('dispensers')
                 .where('companyId',
@@ -134,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         .companyId)
                 .snapshots(),
             builder: (ctx, dispenserSnapshot) {
-              if (dispenserSnapshot.connectionState == ConnectionState.waiting)
+              if (dispenserSnapshot.connectionState == ConnectionState.waiting) // ?: If data has not been received yet, show a loading screen
                 return SplashScreen();
 
               if (dispenserSnapshot.data == null) {

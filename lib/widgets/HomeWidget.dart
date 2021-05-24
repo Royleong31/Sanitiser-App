@@ -47,8 +47,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     menuOpened = Provider.of<UserProvider>(context, listen: true).menuOpened;
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: menuOpened ? null : appBar,
-      body: Stack(
+      appBar: menuOpened ? null : appBar, // ?: When menu is opened, hide the app bar but maintain its height
+      body: Stack( // ?: Stacks components onto of one another (like z-index in css)
         children: <Widget>[
           Container(
             margin: menuOpened

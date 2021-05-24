@@ -27,7 +27,7 @@ class AuthProvider with ChangeNotifier {
 
       final newUserId = newUser.user.uid;
 
-      await FirebaseFirestore.instance.collection('users').add({
+      await FirebaseFirestore.instance.collection('users').add({ // ?: Add a new document to the users collection
         'name': name,
         'email': email,
         'deviceTokens': [],
@@ -38,20 +38,20 @@ class AuthProvider with ChangeNotifier {
       });
 
       final companyDoc =
-          FirebaseFirestore.instance.collection('companies').doc(companyId);
+          FirebaseFirestore.instance.collection('companies').doc(companyId); // ?: Get the company document 
       final companyDocDetails = await companyDoc.get();
       // final companyDispensersList = List<String>.from(companyDocDetails.data()['dispensers']);
       final companyUsersList =
           List<String>.from(companyDocDetails.data()['users']);
       companyUsersList.add(newUserId);
-      await companyDoc.update({'users': companyUsersList});
+      await companyDoc.update({'users': companyUsersList}); // ?: Update the company document to include the new user
 
       Navigator.pop(context);
       print('signed up!');
       return "Signed up!";
     } on FirebaseAuthException catch (e) {
       print('Error: $e');
-      throw e.message;
+      throw e.message; // ?: Throw error to be caught in the sign up page to give a snackbar
     }
   }
 
@@ -80,6 +80,7 @@ class AuthProvider with ChangeNotifier {
     final userDoc = await firebaseDocData.get();
     final deviceTokensList = List<String>.from(userDoc.data()['deviceTokens']);
 
+    // ?: Upon signing out, remove the device token so that the phone does not receive notifications anymore 
     deviceTokensList.remove(deviceToken);
 
     await firebaseDocData.update({'deviceTokens': deviceTokensList});
@@ -89,7 +90,7 @@ class AuthProvider with ChangeNotifier {
 
     print('User document id: $userDocId');
     print('device Token List: $deviceTokensList');
-    notifyListeners();
+    notifyListeners(); // ?: notify listeners of the signout event 
   }
 
   Future<void> changePassword(String oldPassword, String newpassword) async {
@@ -97,6 +98,7 @@ class AuthProvider with ChangeNotifier {
     User user = firebaseAuth.currentUser;
 
     //Pass in the password to updatePassword.
+    // ?: Password is required to change sensitive info such as email and password
     final authResult = await user.reauthenticateWithCredential(
       EmailAuthProvider.credential(
         email: user.email,

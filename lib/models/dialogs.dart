@@ -12,8 +12,9 @@ import 'package:sanitiser_app/widgets/GeneralButton.dart';
 import 'package:sanitiser_app/widgets/InfoDialog.dart';
 import 'package:http/http.dart' as http;
 
+// ?: Most of this dialogs here are similar, using the showGeneralDialog widget. They create a popup translucent dialog.
+
 void openResetDialog(BuildContext context, String dispenserId) {
-  // TODO: Fix bug that causes screen to turn dark!
   final String companyId =
       Provider.of<CompanyProvider>(context, listen: false).companyId;
 

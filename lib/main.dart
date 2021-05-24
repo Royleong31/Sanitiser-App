@@ -19,9 +19,11 @@ import 'provider/userProvider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // ?: This ensures that firebase is initisalised before the app runs
   await Firebase.initializeApp();
   WidgetsFlutterBinding.ensureInitialized();
 
+// ?: This makes the app portrait mode only
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((value) => runApp(MyApp()));
 }
@@ -29,6 +31,7 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // ?: Read docs on the provider package. It is a state management system
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
@@ -44,11 +47,13 @@ class MyApp extends StatelessWidget {
       builder: (ctx, _) => GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
+          // ?: This allows the user to unfocus when they tap out, such as for textfields
           FocusScope.of(context).requestFocus(FocusNode());
           FocusManager.instance.primaryFocus.unfocus();
         },
         child: MaterialApp(
-            debugShowCheckedModeBanner: false,
+            debugShowCheckedModeBanner:
+                false, // ?: Get rid of debug banner on top right screen
             title: 'Sanitiser Info',
             theme: ThemeData(
               primarySwatch: Colors.grey,
@@ -81,11 +86,13 @@ class MyApp extends StatelessWidget {
 }
 
 class Authenticate extends StatelessWidget {
+  // ?: Check if user is logged in.
   @override
   Widget build(BuildContext context) {
     final firebaseUser = context.watch<User>();
     print("Firebase User: $firebaseUser");
 
+// ?: If user is not logged in, return to welcome screen to log in. Otherwise, bring them to logged in home screen
     if (firebaseUser != null) {
       print('home is homescreen');
       Provider.of<UserProvider>(context, listen: false).menuOpened = false;

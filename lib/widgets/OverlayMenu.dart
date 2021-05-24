@@ -13,6 +13,7 @@ import 'package:sanitiser_app/provider/userProvider.dart';
 import 'GeneralOutlinedButton.dart';
 import 'MenuButton.dart';
 
+// ?: This is the translucent overlay menu
 class OverlayMenu extends StatelessWidget {
   OverlayMenu(this.pressHandler, this.menuOpened);
   final Function pressHandler;

@@ -98,7 +98,7 @@ class InfoDialog extends StatelessWidget {
                             if (usageSnapshot.connectionState ==
                                 ConnectionState.waiting)
                               return Center(child: CircularProgressIndicator());
-                            initializeDateFormatting('en_SG');
+                            initializeDateFormatting('en_SG'); // ?: helps to parse the date into sg format
 
                             List<QueryDocumentSnapshot> usageData =
                                 usageSnapshot.data.docs;

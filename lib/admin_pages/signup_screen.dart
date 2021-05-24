@@ -57,6 +57,7 @@ class _SignupScreenState extends State<SignupScreen> {
     ).whenComplete(() => setState(() => showSpinner = false));
   }
 
+// ?: initState runs the first time the page is loaded
   @override
   void initState() {
     super.initState();
@@ -67,6 +68,7 @@ class _SignupScreenState extends State<SignupScreen> {
         .then((QuerySnapshot snp) {
       snp.docs.forEach((element) {
         print('ELEMENT ID: ${element.id}');
+        // ?: Get the list of companies so that we can reject users if they type in an invalid company
         listOfCompanies.add({
           'id': element.id,
           'name': element.data()['companyName'],
@@ -84,6 +86,7 @@ class _SignupScreenState extends State<SignupScreen> {
               end: Alignment.bottomCenter,
               colors: [Colors.white, Theme.of(context).accentColor])),
       child: ModalProgressHUD(
+        // ?: External package that creates an overlay CircularProgressIndicator
         inAsyncCall: showSpinner,
         child: Scaffold(
             appBar: AppBar(
@@ -103,6 +106,7 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             backgroundColor: Colors.transparent,
             body: SingleChildScrollView(
+              // ?: Allows the page to scroll, preventing overflow
               child: Center(
                 child: Form(
                   key: _formKey,
@@ -149,10 +153,11 @@ class _SignupScreenState extends State<SignupScreen> {
                                 .firstWhere((element) => element['name'] == val,
                                     orElse: () {
                               print('no element found');
-                              return null;
+                              return null; // ?: no company with that name was found
                             });
                             print('Selected Company: $selectedCompany');
-                            if (selectedCompany == null)
+                            if (selectedCompany ==
+                                null) // ?: If no such element is found, return null and fail validation
                               return 'Invalid Company Name';
                             return null;
                           }),

@@ -64,6 +64,7 @@ class _EditProfileState extends State<EditProfile>
       }
     });
 
+// ?: This helps o create the animation
     _controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 300),
@@ -84,7 +85,7 @@ class _EditProfileState extends State<EditProfile>
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller.dispose(); // ?: Dispose of controller to prevent memory leaks
     super.dispose();
   }
 
@@ -112,6 +113,7 @@ class _EditProfileState extends State<EditProfile>
       setState(() {
         showSpinner = true;
       });
+      // ?: If there is an error, it will go to catch block
       await Provider.of<UserProvider>(context, listen: false)
           .setName(context, _name);
       ScaffoldMessenger.of(context).hideCurrentSnackBar();

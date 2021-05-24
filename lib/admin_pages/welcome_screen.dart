@@ -5,13 +5,13 @@ import 'login_screen.dart';
 import 'signup_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
-  static const routeName = 'welcome';
+  static const routeName = 'welcome'; // ?: Using a static routeName makes it easier for navigation
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          gradient: LinearGradient(
+          gradient: LinearGradient( // ?: This creates a nice color gradient effect
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [Colors.white, Theme.of(context).accentColor])),
@@ -23,13 +23,13 @@ class WelcomeScreen extends StatelessWidget {
           child: Center(
             child: Column(
               children: [
-                SizedBox(height: 130),
+                SizedBox(height: 130), // ?: This helps to push the text down to align it
                 Text(
                   'WELCOME',
                   style: TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
                 ),
                 SizedBox(height: 360),
-                ColoredWelcomeButton(() {
+                ColoredWelcomeButton(() { // ?: Custom widget
                   Navigator.pushNamed(context, LoginScreen.routeName);
                 }, 'LOG IN'),
                 SizedBox(height: 20),

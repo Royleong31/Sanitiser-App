@@ -23,6 +23,7 @@ class CompanyProvider with ChangeNotifier {
     print('Users: $_users');
   }
 
+// Getter functions so that the variables cannot be accidentally changed in other files
   String get companyName => _companyName;
   String get companyId => _companyId;
   List<String> get users => users;
@@ -33,7 +34,7 @@ class CompanyProvider with ChangeNotifier {
     final firebaseDocData =
         FirebaseFirestore.instance.collection('companies').doc(_companyId);
 
-    await firebaseDocData.update({'dispensers': _dispensers});
+    await firebaseDocData.update({'dispensers': _dispensers}); // ?: Update the company doc that a dispenser was added
 
     print('Added Dispenser List: $_dispensers');
   }
@@ -43,7 +44,7 @@ class CompanyProvider with ChangeNotifier {
     final firebaseDocData =
         FirebaseFirestore.instance.collection('companies').doc(_companyId);
 
-    await firebaseDocData.update({'dispensers': _dispensers});
+    await firebaseDocData.update({'dispensers': _dispensers}); // ?: Update the company doc that a dispenser was removed
 
     print('Deleted Dispenser List: $_dispensers');
   }

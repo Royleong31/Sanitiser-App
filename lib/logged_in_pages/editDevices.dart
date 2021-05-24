@@ -155,7 +155,7 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
                               child: GestureDetector(
                                 onTap: () async {
                                   print('opening qr code scanner');
-                                  await scanQRCode();
+                                  await scanQRCode(); // ?: the result of the QR scan will be filled into the dispneserId
                                   print('QR code result is: $dispenserId');
                                 },
                                 child: Icon(
@@ -180,7 +180,7 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
                                 if (_onSaved()) {
                                   try {
                                     if (locationList
-                                        .contains(deviceLocation.toUpperCase()))
+                                        .contains(deviceLocation.toUpperCase())) // ?: Reject devices with the same name
                                       throw CustomException(
                                           'Another device has the same name');
                                     await kAddNewDispenser(
@@ -295,7 +295,7 @@ class _EditDevicesWidgetState extends State<EditDevicesWidget> {
     final index = locationList.indexOf(oldLocation);
     print("Location List: $locationList");
     print('New location: $newLocation');
-    if (locationList.contains(newLocation)) return false;
+    if (locationList.contains(newLocation)) return false; // ?: Reject locations that have the same name
     locationList[index] = newLocation;
     print('Location List after editing: $locationList');
     return true;

@@ -27,7 +27,7 @@ class _GeneralButtonState extends State<GeneralButton> {
                   foregroundColor:
                       MaterialStateProperty.all<Color>(Colors.black)),
               onPressed: widget.isAsync
-                  ? () async {
+                  ? () async { // ?: this makes the button into a circular progress indicator to show that it is loading
                       setState(() {
                         waiting = true;
                       });

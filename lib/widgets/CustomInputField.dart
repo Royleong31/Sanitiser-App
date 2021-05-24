@@ -9,6 +9,7 @@ class CustomInputField extends StatelessWidget {
   final TextEditingController controller;
   Function validatorHandler;
 
+// ?: Named parameters are optional by default
   CustomInputField({
     this.label,
     this.saveHandler,
@@ -20,6 +21,7 @@ class CustomInputField extends StatelessWidget {
     this.padRight: false,
   }) {
     if (validatorHandler == null) {
+      // ?: Sets a default validatorHandler 
       validatorHandler = (String val) {
         if (val.isEmpty) return 'Field cannot be empty';
         return null;

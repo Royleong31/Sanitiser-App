@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+// ?: This changes the way that pages transition in the app
+
 class CustomRoute<T> extends MaterialPageRoute<T> {
   CustomRoute({WidgetBuilder builder, RouteSettings settings})
       : super(

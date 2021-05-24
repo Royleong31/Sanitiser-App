@@ -59,7 +59,7 @@ class UserProvider with ChangeNotifier {
         FirebaseFirestore.instance.collection('users').doc(userDocId);
 
     await firebaseDocData.update(
-        {'notificationLevel': newLevel, 'notifyWhenRefilled': newNotify});
+        {'notificationLevel': newLevel, 'notifyWhenRefilled': newNotify}); // ?: Update the user doc with the new notification settings
     print('updating notification settings in firebase');
   }
 

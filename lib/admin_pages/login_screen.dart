@@ -16,12 +16,12 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   String _email, _password;
   bool showSpinner = false;
-  final _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>(); // ?: Form keys are used for validation of forms
 
   bool _onSaved() {
     final isValid = _formKey.currentState.validate();
     FocusScope.of(context).unfocus();
-    if (!isValid) return false;
+    if (!isValid) return false; // ?: Prevents form submission
     _formKey.currentState.save();
     print('Email Value: $_email, Password Value: $_password');
     return true;
@@ -34,6 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
     await Provider.of<AuthProvider>(context, listen: false)
         .signIn(_email, _password, context)
         .catchError((err) {
+          // ?: Show a snackbar if there was an error
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(err),
         backgroundColor: Theme.of(context).errorColor,
@@ -95,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         label: 'EMAIL',
                         saveHandler: (val) => _email = val.trim(),
                         keyboardType: TextInputType.emailAddress,
-                        validatorHandler: (val) {
+                        validatorHandler: (val) { // ?: Custom validation handler
                           if (!val.contains('@') || !val.contains('.com'))
                             return 'Please enter a valid email address';
                           return null;

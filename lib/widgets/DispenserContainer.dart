@@ -3,6 +3,7 @@ import 'package:sanitiser_app/models/const.dart';
 import 'package:sanitiser_app/models/dialogs.dart';
 import 'GeneralButton.dart';
 
+// ?: This is the container for each individual dispenser
 // ignore: must_be_immutable
 class DispenserContainer extends StatelessWidget {
   DispenserContainer({
@@ -115,7 +116,7 @@ class DispenserContainer extends StatelessWidget {
                     kLightGreyColor,
                     level == 100
                         ? () {
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar(); // ?: Hides old snackbar if any. This prevents snackbars from popping up one after another
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 duration: Duration(seconds: 2),
